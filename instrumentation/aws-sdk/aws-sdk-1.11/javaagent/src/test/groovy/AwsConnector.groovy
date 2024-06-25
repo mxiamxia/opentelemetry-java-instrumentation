@@ -8,6 +8,10 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.regions.Regions
+import com.amazonaws.services.kinesis.AmazonKinesisClient
+import com.amazonaws.services.kinesis.model.CreateStreamRequest
+import com.amazonaws.services.kinesis.model.RegisterStreamConsumerRequest
+import com.amazonaws.services.kinesis.model.RegisterStreamConsumerResult
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.BucketNotificationConfiguration
 import com.amazonaws.services.s3.model.ObjectListing
@@ -23,12 +27,42 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClient
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient
+import com.amazonaws.services.secretsmanager.model.CreateSecretRequest
+import com.amazonaws.services.secretsmanager.model.CreateSecretResult
+import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest
+import com.amazonaws.services.secretsmanager.model.DescribeSecretResult
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient
+import com.amazonaws.services.identitymanagement.model.CreateRoleRequest
+import com.amazonaws.services.identitymanagement.model.CreateRoleResult
+import com.amazonaws.services.identitymanagement.model.AttachRolePolicyRequest
+import com.amazonaws.services.identitymanagement.model.PutRolePolicyRequest
+import com.amazonaws.services.stepfunctions.AWSStepFunctionsClient
+import com.amazonaws.services.stepfunctions.model.CreateStateMachineRequest
+import com.amazonaws.services.stepfunctions.model.CreateStateMachineResult
+import com.amazonaws.services.stepfunctions.model.DescribeStateMachineRequest
+import com.amazonaws.services.stepfunctions.model.DescribeStateMachineResult
+import com.amazonaws.services.lambda.AWSLambdaClient
+import com.amazonaws.services.lambda.model.CreateFunctionRequest
+import com.amazonaws.services.lambda.model.CreateFunctionResult
+import com.amazonaws.services.lambda.model.CreateEventSourceMappingRequest
+import com.amazonaws.services.lambda.model.CreateEventSourceMappingResult
+import com.amazonaws.services.lambda.model.GetFunctionRequest
+import com.amazonaws.services.lambda.model.GetFunctionResult
+import com.amazonaws.services.lambda.model.GetEventSourceMappingRequest
+import com.amazonaws.services.lambda.model.GetEventSourceMappingResult
+import com.amazonaws.services.lambda.model.FunctionCode
+import com.amazonaws.services.lambda.model.Runtime
+
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.utility.DockerImageName
 
 import java.time.Duration
+import java.nio.ByteBuffer
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class AwsConnector {
 
@@ -37,6 +71,11 @@ class AwsConnector {
   private AmazonSQSAsyncClient sqsClient
   private AmazonS3Client s3Client
   private AmazonSNSAsyncClient snsClient
+  private AmazonKinesisClient kinesisClient
+  private AWSSecretsManagerClient secretsManagerClient
+  private AWSStepFunctionsClient stepFunctionsClient
+  private AmazonIdentityManagementClient iamClient
+  private AWSLambdaClient lambdaClient
 
   static localstack() {
     AwsConnector awsConnector = new AwsConnector()
@@ -66,6 +105,31 @@ class AwsConnector {
       .withCredentials(credentialsProvider)
       .build()
 
+    awsConnector.kinesisClient = AmazonKinesisClient.builder()
+      .withEndpointConfiguration(getEndpointConfiguration(awsConnector.localstack, LocalStackContainer.Service.KINESIS))
+      .withCredentials(credentialsProvider)
+      .build()
+
+    awsConnector.secretsManagerClient = AWSSecretsManagerClient.builder()
+      .withEndpointConfiguration(getEndpointConfiguration(awsConnector.localstack, LocalStackContainer.Service.SECRETSMANAGER))
+      .withCredentials(credentialsProvider)
+      .build()
+
+    awsConnector.stepFunctionsClient = AWSStepFunctionsClient.builder()
+      .withEndpointConfiguration(getEndpointConfiguration(awsConnector.localstack, LocalStackContainer.Service.STEPFUNCTIONS))
+      .withCredentials(credentialsProvider)
+      .build()
+
+    awsConnector.iamClient = AmazonIdentityManagementClient.builder()
+      .withEndpointConfiguration(getEndpointConfiguration(awsConnector.localstack, LocalStackContainer.Service.IAM))
+      .withCredentials(credentialsProvider)
+      .build()
+
+    awsConnector.lambdaClient = AWSLambdaClient.builder()
+      .withEndpointConfiguration(getEndpointConfiguration(awsConnector.localstack, LocalStackContainer.Service.LAMBDA))
+      .withCredentials(credentialsProvider)
+      .build()
+
     return awsConnector
   }
 
@@ -85,6 +149,26 @@ class AwsConnector {
       .build()
 
     awsConnector.snsClient = AmazonSNSAsyncClient.asyncBuilder()
+      .withRegion(Regions.US_EAST_1)
+      .build()
+
+    awsConnector.kinesisClient = AmazonKinesisClient.builder()
+      .withRegion(Regions.US_EAST_1)
+      .build()
+
+    awsConnector.secretsManagerClient = AWSSecretsManagerClient.standard()
+      .withRegion(Regions.US_EAST_1)
+      .build()
+
+    awsConnector.stepFunctionsClient = AWSStepFunctionsClient.standard()
+      .withRegion(Regions.US_EAST_1)
+      .build()
+
+    awsConnector.iamClient = AmazonIdentityManagementClient.standard()
+      .withRegion(Regions.US_EAST_1)
+      .build()
+
+    awsConnector.lambdaClient = AWSLambdaClient.standard()
       .withRegion(Regions.US_EAST_1)
       .build()
 
@@ -191,6 +275,141 @@ class AwsConnector {
 
   def publishSampleNotification(String topicArn) {
     snsClient.publish(topicArn, "Hello There")
+  }
+
+  def createStream(String streamName, Integer shardCount) {
+    println "Create stream ${streamName} with ${shardCount} shards"
+    CreateStreamRequest createStreamRequest = new CreateStreamRequest()
+      .withStreamName(streamName)
+      .withShardCount(shardCount)
+    kinesisClient.createStream(createStreamRequest)
+    return kinesisClient.describeStream(streamName).getStreamDescription().getStreamARN()
+  }
+
+  def registerStreamConsumer(String streamARN, String consumerName) {
+    println "Register consumer ${consumerName} for stream ${streamARN}"
+    RegisterStreamConsumerRequest registerStreamConsumerRequest = new RegisterStreamConsumerRequest()
+      .withStreamARN(streamARN)
+      .withConsumerName(consumerName)
+    RegisterStreamConsumerResult registerStreamConsumerResult = kinesisClient.registerStreamConsumer(registerStreamConsumerRequest)
+    return registerStreamConsumerResult.getConsumer().getConsumerARN()
+  }
+
+  def createSecret(String secretName, String secretValue) {
+    println "Create secret ${secretName}"
+    CreateSecretRequest createSecretRequest = new CreateSecretRequest()
+      .withName(secretName)
+      .withSecretString(secretValue)
+    CreateSecretResult createSecretResult = secretsManagerClient.createSecret(createSecretRequest)
+    return createSecretResult.getARN()
+  }
+
+  def describeSecret(String secretName) {
+    println "Describe secret ${secretName}"
+    DescribeSecretRequest describeSecretRequest = new DescribeSecretRequest()
+      .withSecretId(secretName)
+    DescribeSecretResult describeSecretResult = secretsManagerClient.describeSecret(describeSecretRequest)
+    return describeSecretResult
+  }
+
+  def createRole(String roleName, String policy) {
+    println "Create role ${roleName}"
+    CreateRoleRequest createRoleRequest = new CreateRoleRequest()
+      .withRoleName(roleName)
+      .withAssumeRolePolicyDocument(policy)
+    CreateRoleResult createRoleResult = iamClient.createRole(createRoleRequest)
+    return createRoleResult.getRole().getArn()
+  }
+
+  def attachRolePolicy(String roleName, String policyArn) {
+    println "Attach policy ${policyArn} to role ${roleName}"
+    AttachRolePolicyRequest attachRolePolicyRequest = new AttachRolePolicyRequest()
+      .withRoleName(roleName)
+      .withPolicyArn(policyArn)
+    iamClient.attachRolePolicy(attachRolePolicyRequest)
+  }
+
+  def putRolePolicy(String roleName, String policyName, String policyDocument) {
+    println "Put policy ${policyName} for role ${roleName}"
+    PutRolePolicyRequest putRolePolicyRequest = new PutRolePolicyRequest()
+      .withRoleName(roleName)
+      .withPolicyName(policyName)
+      .withPolicyDocument(policyDocument)
+    iamClient.putRolePolicy(putRolePolicyRequest)
+  }
+
+  def createStateMachine(String stateMachineName, String stateMachineDefinition, String stateMachineRoleArn) {
+    println "Create state machine ${stateMachineName}"
+    CreateStateMachineRequest createStateMachineRequest = new CreateStateMachineRequest()
+      .withName(stateMachineName)
+      .withDefinition(stateMachineDefinition)
+      .withRoleArn(stateMachineRoleArn)
+    CreateStateMachineResult createStateMachineResult = stepFunctionsClient.createStateMachine(createStateMachineRequest)
+    return createStateMachineResult.getStateMachineArn()
+  }
+
+  def describeStateMachine(String stateMachineArn) {
+    println "Describe state machine ${stateMachineArn}"
+    DescribeStateMachineRequest describeStateMachineRequest = new DescribeStateMachineRequest()
+      .withStateMachineArn(stateMachineArn)
+    DescribeStateMachineResult describeStateMachineResult = stepFunctionsClient.describeStateMachine(describeStateMachineRequest)
+    return describeStateMachineResult
+  }
+
+  def createFunction(String functionName, String roleArn, String handler) {
+    println "Create function ${functionName}"
+    String lambdaFunctionCode = """
+            def lambda_handler(event, context):
+                print("Received event: " + str(event))
+                return {
+                    'statusCode': 200,
+                    'body': 'Hello from Lambda!'
+                }
+            """
+
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream()
+    ZipOutputStream zos = new ZipOutputStream(baos)
+    ZipEntry entry = new ZipEntry("lambda_function.py")
+    zos.putNextEntry(entry)
+    zos.write(lambdaFunctionCode.getBytes())
+    zos.closeEntry()
+    zos.close()
+    byte[] zipFileBytes = baos.toByteArray()
+
+    CreateFunctionRequest createFunctionRequest = new CreateFunctionRequest()
+      .withFunctionName(functionName)
+      .withRuntime(Runtime.Python38)
+      .withRole(roleArn)
+      .withHandler(handler)
+      .withCode(new FunctionCode().withZipFile(ByteBuffer.wrap(zipFileBytes)))
+    CreateFunctionResult createFunctionResult = lambdaClient.createFunction(createFunctionRequest)
+    return createFunctionResult.getFunctionArn()
+  }
+
+  def createEventSourceMapping(String functionName, String eventSourceArn) {
+    println "Create event source mapping for function ${functionName}"
+    CreateEventSourceMappingRequest createEventSourceMappingRequest = new CreateEventSourceMappingRequest()
+      .withFunctionName(functionName)
+      .withEventSourceArn(eventSourceArn)
+    CreateEventSourceMappingResult createEventSourceMappingResult = lambdaClient.createEventSourceMapping(createEventSourceMappingRequest)
+    return createEventSourceMappingResult.getUUID()
+  }
+
+  def getFunction(String functionName) {
+    println "Get function ${functionName}"
+    GetFunctionRequest getFunctionRequest = new GetFunctionRequest()
+      .withFunctionName(functionName)
+    GetFunctionResult getFunctionResult = lambdaClient.getFunction(getFunctionRequest)
+    return getFunctionResult.getConfiguration()
+  }
+
+  def getEventSourceMapping(String uuid) {
+    println "Get event source mapping ${uuid}"
+    GetEventSourceMappingRequest getEventSourceMappingRequest = new GetEventSourceMappingRequest()
+      .withUUID(uuid)
+    GetEventSourceMappingResult getEventSourceMappingResult = lambdaClient.getEventSourceMapping(getEventSourceMappingRequest)
+    return getEventSourceMappingResult
   }
 
   def disconnect() {

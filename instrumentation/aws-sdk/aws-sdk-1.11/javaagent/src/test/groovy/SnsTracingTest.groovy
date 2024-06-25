@@ -154,6 +154,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "$SemanticAttributes.NET_PROTOCOL_VERSION" "1.1"
             "net.peer.port" { it == null || Number }
             "$SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH" Long
+            "$SemanticAttributes.MESSAGING_DESTINATION_NAME" topicArn
           }
         }
       }
@@ -176,6 +177,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "$SemanticAttributes.NET_PROTOCOL_VERSION" "1.1"
             "net.peer.port" { it == null || Number }
             "$SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH" Long
+            "$SemanticAttributes.MESSAGING_DESTINATION_NAME" topicArn
           }
         }
         span(1) {

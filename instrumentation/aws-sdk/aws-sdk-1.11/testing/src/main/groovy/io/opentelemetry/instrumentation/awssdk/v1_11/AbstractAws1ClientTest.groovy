@@ -23,10 +23,23 @@ import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder
 import com.amazonaws.services.kinesis.model.DeleteStreamRequest
+import com.amazonaws.services.kinesis.model.RegisterStreamConsumerRequest
 import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.rds.model.DeleteOptionGroupRequest
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.services.sns.AmazonSNSClientBuilder
+import com.amazonaws.services.sns.model.PublishRequest
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder
+import com.amazonaws.services.secretsmanager.model.CreateSecretRequest
+import com.amazonaws.services.stepfunctions.model.DescribeStateMachineRequest
+import com.amazonaws.services.stepfunctions.model.GetActivityTaskRequest
+import com.amazonaws.services.stepfunctions.AWSStepFunctionsClientBuilder
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder
+import com.amazonaws.services.lambda.model.GetEventSourceMappingRequest
+import com.amazonaws.services.lambda.model.GetFunctionRequest
+
+
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.test.InstrumentationSpecification
 import io.opentelemetry.semconv.SemanticAttributes
@@ -101,6 +114,9 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
           name "$service.$operation"
           kind operation == "SendMessage" ? PRODUCER : CLIENT
           hasNoParent()
+          span.attributes.each { attribute ->
+            println("      ${attribute}")
+          }
           attributes {
             "$SemanticAttributes.HTTP_URL" "${server.httpUri()}"
             "$SemanticAttributes.HTTP_METHOD" "$method"
@@ -156,6 +172,38 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
           </ResponseMetadata>
         </DeleteOptionGroupResponse>
       """
+    "SNS"        | "Publish"           | "POST" | "d74b8436-ae13-5ab4-a9ff-ce54dfea72a0" | AmazonSNSClientBuilder.standard()                 | { c -> c.publish(new PublishRequest().withMessage("somemessage").withTopicArn("somearn")) } | ["$SemanticAttributes.MESSAGING_DESTINATION_NAME": "somearn"] | """
+          <PublishResponse xmlns="https://sns.amazonaws.com/doc/2010-03-31/">
+              <PublishResult>
+                  <MessageId>567910cd-659e-55d4-8ccb-5aaf14679dc0</MessageId>
+              </PublishResult>
+              <ResponseMetadata>
+                  <RequestId>d74b8436-ae13-5ab4-a9ff-ce54dfea72a0</RequestId>
+              </ResponseMetadata>
+          </PublishResponse>
+      """
+    "SNS"      | "Publish"            | "POST" | "d74b8436-ae13-5ab4-a9ff-ce54dfea72a0" | AmazonSNSClientBuilder.standard()                 | { c -> c.publish(new PublishRequest().withMessage("somemessage").withTargetArn("somearn")) } | ["$SemanticAttributes.MESSAGING_DESTINATION_NAME": "somearn"] | """
+          <PublishResponse xmlns="https://sns.amazonaws.com/doc/2010-03-31/">
+              <PublishResult>
+                  <MessageId>567910cd-659e-55d4-8ccb-5aaf14679dc0</MessageId>
+              </PublishResult>
+              <ResponseMetadata>
+                  <RequestId>d74b8436-ae13-5ab4-a9ff-ce54dfea72a0</RequestId>
+              </ResponseMetadata>
+          </PublishResponse>
+      """
+    "Kinesis"    | "RegisterStreamConsumer"  | "POST" | "/"                   | AmazonKinesisClientBuilder.standard()                        | { c -> c.registerStreamConsumer(new RegisterStreamConsumerRequest().withStreamARN("streamARN").withConsumerName("consumerName")) } | ["aws.stream.consumer_name": "consumerName"] | ""
+    "AWSSecretsManager"    | "CreateSecret"  | "POST" | "/"                   | AWSSecretsManagerClientBuilder.standard()                        | { c -> c.createSecret(new CreateSecretRequest().withName("secretName").withSecretString("secretValue")) } | ["aws.secretsmanager.secret_arn": "arn:aws:secretsmanager:us-west-2:123456789012:secret:MyTestDatabaseSecret-a1b2c3"] | """
+          {
+            "ARN": "arn:aws:secretsmanager:us-west-2:123456789012:secret:MyTestDatabaseSecret-a1b2c3",
+            "Name":"MyTestDatabaseSecret",
+            "VersionId": "EXAMPLE1-90ab-cdef-fedc-ba987SECRET1"
+          }
+      """
+    "AWSStepFunctions"    | "DescribeStateMachine"  | "POST" | "/"                   | AWSStepFunctionsClientBuilder.standard()                        | { c -> c.describeStateMachine(new DescribeStateMachineRequest().withStateMachineArn("stateMachineArn")) } | ["aws.stepfunctions.state_machine_arn": "stateMachineArn"] | ""
+    "AWSStepFunctions"    | "GetActivityTask"     | "POST" | "/"                   | AWSStepFunctionsClientBuilder.standard()                        | { c -> c.getActivityTask(new GetActivityTaskRequest().withActivityArn("activityArn")) }      | ["aws.stepfunctions.activity_arn": "activityArn"] | ""
+    "AWSLambda"    | "GetEventSourceMapping"  | "GET" | "/"                   | AWSLambdaClientBuilder.standard()                        | { c -> c.getEventSourceMapping(new GetEventSourceMappingRequest().withUUID("uuid")) } | ["aws.lambda.resource_mapping_id": "uuid"]   | ""
+    "AWSLambda"    | "GetFunction"            | "GET" | "/"                   | AWSLambdaClientBuilder.standard()                        | { c -> c.getFunction(new GetFunctionRequest().withFunctionName("functionName")) }           | ["aws.lambda.function_name": "functionName"] | ""
   }
 
   def "send #operation request to closed port"() {
