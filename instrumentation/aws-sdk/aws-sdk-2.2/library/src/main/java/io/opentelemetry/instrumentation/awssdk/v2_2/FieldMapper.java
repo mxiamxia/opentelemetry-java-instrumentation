@@ -9,11 +9,15 @@ import io.opentelemetry.api.trace.Span;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkRequest;
 import software.amazon.awssdk.core.SdkResponse;
 import software.amazon.awssdk.utils.StringUtils;
 
 class FieldMapper {
+
+  private static final Logger logger = LoggerFactory.getLogger(FieldMapper.class);
 
   private final Serializer serializer;
   private final MethodHandleFactory methodHandleFactory;
@@ -65,8 +69,19 @@ class FieldMapper {
     for (int i = 1; i < path.size() && target != null; i++) {
       target = next(target, path.get(i));
     }
+    String value;
     if (target != null) {
-      String value = serializer.serialize(target);
+      if (AwsResourceAttributes.isGenAiAttribute(fieldMapping.getAttribute())) {
+        logger.info("isGenAiAttribute: " + fieldMapping.getAttribute());
+        value = serializer.serialize(fieldMapping.getAttribute(), target);
+        span.setAttribute("gen_ai.system", "AWS Bedrock");
+        logger.info("isGenAiAttribute value: " + value);
+      } else {
+        logger.info("Not isGenAiAttribute: " + fieldMapping.getAttribute());
+        value = serializer.serialize(target);
+        logger.info("Not isGenAiAttribute value: " + value);
+      }
+
       if (!StringUtils.isEmpty(value)) {
         span.setAttribute(fieldMapping.getAttribute(), value);
       }
