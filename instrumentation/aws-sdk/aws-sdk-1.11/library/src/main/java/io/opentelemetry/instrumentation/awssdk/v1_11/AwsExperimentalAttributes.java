@@ -18,6 +18,26 @@ final class AwsExperimentalAttributes {
   static final AttributeKey<String> AWS_STREAM_NAME = stringKey("aws.stream.name");
   static final AttributeKey<String> AWS_TABLE_NAME = stringKey("aws.table.name");
   static final AttributeKey<String> AWS_REQUEST_ID = stringKey("aws.requestId");
+  static final AttributeKey<String> AWS_AGENT_ID = stringKey("aws.bedrock.agent_id");
+  static final AttributeKey<String> AWS_KNOWLEDGEBASE_ID =
+      stringKey("aws.bedrock.knowledgebase_id");
+  static final AttributeKey<String> AWS_DATASOURCE_ID = stringKey("aws.bedrock.datasource_id");
+
+  static final AttributeKey<String> AWS_GUARDRAIL_ID = stringKey("aws.bedrock.guardrail_id");
+  static final AttributeKey<String> AWS_BEDROCK_RUNTIME_MODEL_ID =
+      stringKey("gen_ai.request.model");
+  static final AttributeKey<String> AWS_BEDROCK_RUNTIME_TEMPRATURE =
+      stringKey("gen_ai.request.temperature");
+  static final AttributeKey<String> AWS_BEDROCK_RUNTIME_MAX_TOKEN_COUNT =
+      stringKey("gen_ai.request.max_tokens");
+  static final AttributeKey<String> AWS_BEDROCK_RUNTIME_TOP_P = stringKey("gen_ai.request.top_p");
+  static final AttributeKey<String> AWS_BEDROCK_PROMOT_TOKENS =
+      stringKey("gen_ai.usage.prompt_tokens");
+  static final AttributeKey<String> AWS_BEDROCK_COMPLETION_TOKENS =
+      stringKey("gen_ai.usage.completion_tokens");
+  static final AttributeKey<String> AWS_BEDROCK_FINISH_REASONS =
+      stringKey("gen_ai.response.finish_reasons");
+  static final AttributeKey<String> AWS_BEDROCK_SYSTEM = stringKey("gen_ai.system");
 
   private AwsExperimentalAttributes() {}
 }

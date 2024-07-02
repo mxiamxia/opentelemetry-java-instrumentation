@@ -40,13 +40,18 @@ final class AwsSdkInstrumenterFactory {
       RpcClientAttributesExtractor.create(AwsSdkRpcAttributesGetter.INSTANCE);
   private static final AwsSdkExperimentalAttributesExtractor experimentalAttributesExtractor =
       new AwsSdkExperimentalAttributesExtractor();
+  private static final BedrockAttributesExtractor bedrockAttributesExtractor =
+      new BedrockAttributesExtractor();
 
   private static final List<AttributesExtractor<Request<?>, Response<?>>>
       defaultAttributesExtractors = Arrays.asList(httpAttributesExtractor, rpcAttributesExtractor);
   private static final List<AttributesExtractor<Request<?>, Response<?>>>
       extendedAttributesExtractors =
           Arrays.asList(
-              httpAttributesExtractor, rpcAttributesExtractor, experimentalAttributesExtractor);
+              httpAttributesExtractor,
+              rpcAttributesExtractor,
+              experimentalAttributesExtractor,
+              bedrockAttributesExtractor);
   private static final AwsSdkSpanNameExtractor spanName = new AwsSdkSpanNameExtractor();
 
   private final OpenTelemetry openTelemetry;
