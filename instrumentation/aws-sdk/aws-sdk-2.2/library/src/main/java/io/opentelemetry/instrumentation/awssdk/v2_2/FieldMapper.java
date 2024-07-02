@@ -65,8 +65,15 @@ class FieldMapper {
     for (int i = 1; i < path.size() && target != null; i++) {
       target = next(target, path.get(i));
     }
+    String value;
     if (target != null) {
-      String value = serializer.serialize(target);
+      if (AwsExperimentalAttributes.isGenAiAttribute(fieldMapping.getAttribute())) {
+        value = serializer.serialize(fieldMapping.getAttribute(), target);
+        span.setAttribute("gen_ai.system", "AWS Bedrock");
+      } else {
+        value = serializer.serialize(target);
+      }
+
       if (!StringUtils.isEmpty(value)) {
         span.setAttribute(fieldMapping.getAttribute(), value);
       }
