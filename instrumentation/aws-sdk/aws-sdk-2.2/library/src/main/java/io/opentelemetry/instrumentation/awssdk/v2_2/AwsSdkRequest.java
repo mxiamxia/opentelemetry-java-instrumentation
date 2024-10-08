@@ -12,8 +12,12 @@ import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.BED
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.BEDROCKRUNTIME;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.DYNAMODB;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.KINESIS;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.LAMBDA;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.S3;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.SECRETSMANAGER;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.SNS;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.SQS;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsSdkRequestType.STEPFUNCTION;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.FieldMapping.request;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.FieldMapping.response;
 
@@ -37,6 +41,10 @@ enum AwsSdkRequest {
   S3Request(S3, "S3Request"),
   SqsRequest(SQS, "SqsRequest"),
   KinesisRequest(KINESIS, "KinesisRequest"),
+  SnsRequest(SNS, "SnsRequest"),
+  SecretsManagerRequest(SECRETSMANAGER, "SecretsManagerRequest"),
+  SfnRequest(STEPFUNCTION, "SfnRequest"),
+  LambdaRequest(LAMBDA, "LambdaRequest"),
   BedrockRequest(BEDROCK, "BedrockRequest"),
   BedrockAgentRuntimeRequest(BEDROCKAGENTOPERATION, "BedrockAgentRuntimeRequest"),
   BedrockRuntimeRequest(BEDROCKRUNTIME, "BedrockRuntimeRequest"),

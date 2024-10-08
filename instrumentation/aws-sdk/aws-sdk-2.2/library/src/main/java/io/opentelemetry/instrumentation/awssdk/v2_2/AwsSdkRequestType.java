@@ -10,8 +10,14 @@ import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttrib
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_DATA_SOURCE_ID;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_GUARDRAIL_ID;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_KNOWLEDGE_BASE_ID;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_LAMBDA_NAME;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_LAMBDA_RESOURCE_ID;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_QUEUE_NAME;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_QUEUE_URL;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_SECRET_ARN;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_SNS_TOPIC_ARN;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_STATE_MACHINE_ARN;
+import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_STEP_FUNCTIONS_ACTIVITY_ARN;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_STREAM_NAME;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.AWS_TABLE_NAME;
 import static io.opentelemetry.instrumentation.awssdk.v2_2.AwsExperimentalAttributes.GEN_AI_MODEL;
@@ -36,7 +42,17 @@ enum AwsSdkRequestType {
   BEDROCKKNOWLEDGEBASEOPERATION(
       request(AWS_KNOWLEDGE_BASE_ID.getKey(), "knowledgeBaseId"),
       response(AWS_KNOWLEDGE_BASE_ID.getKey(), "knowledgeBaseId")),
-  BEDROCKRUNTIME(request(GEN_AI_MODEL.getKey(), "modelId"));
+  BEDROCKRUNTIME(request(GEN_AI_MODEL.getKey(), "modelId")),
+
+  SNS(request(AWS_SNS_TOPIC_ARN.getKey(), "TopicArn")),
+  SECRETSMANAGER(response(AWS_SECRET_ARN.getKey(), "ARN")),
+
+  STEPFUNCTION(
+      request(AWS_STATE_MACHINE_ARN.getKey(), "stateMachineArn"),
+      request(AWS_STEP_FUNCTIONS_ACTIVITY_ARN.getKey(), "activityArn")),
+  LAMBDA(
+      request(AWS_LAMBDA_NAME.getKey(), "FunctionName"),
+      request(AWS_LAMBDA_RESOURCE_ID.getKey(), "UUID"));
 
   // Wrapping in unmodifiableMap
   @SuppressWarnings("ImmutableEnumChecker")

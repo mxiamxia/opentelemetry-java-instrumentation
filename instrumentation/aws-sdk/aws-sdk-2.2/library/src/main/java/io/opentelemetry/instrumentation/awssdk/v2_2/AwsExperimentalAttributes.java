@@ -24,6 +24,15 @@ final class AwsExperimentalAttributes {
   // TODO: Merge in gen_ai attributes in opentelemetry-semconv-incubating once upgrade to v1.26.0
   static final AttributeKey<String> GEN_AI_MODEL = stringKey("gen_ai.request.model");
   static final AttributeKey<String> GEN_AI_SYSTEM = stringKey("gen_ai.system");
+  static final AttributeKey<String> AWS_SNS_TOPIC_ARN = stringKey("aws.sns.topic.arn");
+  static final AttributeKey<String> AWS_SECRET_ARN = stringKey("aws.secretsmanager.secret.arn");
+  static final AttributeKey<String> AWS_STATE_MACHINE_ARN =
+      stringKey("aws.stepfunctions.state_machine.arn");
+  static final AttributeKey<String> AWS_STEP_FUNCTIONS_ACTIVITY_ARN =
+      stringKey("aws.stepfunctions.activity.arn");
+  static final AttributeKey<String> AWS_LAMBDA_NAME = stringKey("aws.lambda.function.name");
+  static final AttributeKey<String> AWS_LAMBDA_RESOURCE_ID =
+      stringKey("aws.lambda.resource_mapping.id");
 
   private AwsExperimentalAttributes() {}
 }
