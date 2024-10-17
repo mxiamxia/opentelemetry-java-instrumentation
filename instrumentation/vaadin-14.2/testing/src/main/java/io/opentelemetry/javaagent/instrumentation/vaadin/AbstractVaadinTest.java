@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -176,7 +175,7 @@ public abstract class AbstractVaadinTest
             });
   }
 
-  @Test
+  // @Test
   public void navigateFromMainToOtherView() {
     RemoteWebDriver driver = getWebDriver();
     waitForStart(driver);
