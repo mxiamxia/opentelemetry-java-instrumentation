@@ -65,10 +65,46 @@ class FieldMapper {
     for (int i = 1; i < path.size() && target != null; i++) {
       target = next(target, path.get(i));
     }
+    String attributeName = fieldMapping.getAttribute();
     if (target != null) {
-      String value = serializer.serialize(target);
-      if (!StringUtils.isEmpty(value)) {
-        span.setAttribute(fieldMapping.getAttribute(), value);
+      // NOTE: The attributes have varying data types according to Otel Gen AI semantic conventions.
+      // https://github.com/open-telemetry/semantic-conventions/blob/main/docs/gen-ai/gen-ai-spans.md#genai-attributes
+      if (AwsExperimentalAttributes.isGenAiInferenceAttribute(attributeName)) {
+        switch (attributeName) {
+          case "gen_ai.request.temperature":
+          case "gen_ai.request.top_p":
+            Double doubleVal = serializer.serialize(attributeName, target, Double.class);
+            if (doubleVal != null) {
+              span.setAttribute(attributeName, doubleVal);
+            }
+            break;
+          case "gen_ai.request.max_tokens":
+          case "gen_ai.usage.input_tokens":
+          case "gen_ai.usage.output_tokens":
+            Integer intVal = serializer.serialize(attributeName, target, Integer.class);
+            if (intVal != null) {
+              span.setAttribute(attributeName, intVal);
+            }
+            break;
+          case "gen_ai.response.finish_reasons":
+            String finishReasons = serializer.serialize(attributeName, target, String.class);
+            if (finishReasons != null) {
+              // NOTE: setAttribute only support primitive data types so we are restricted to String
+              // instead of String[] as recommended by semantic conventions.
+              span.setAttribute(attributeName, finishReasons);
+            }
+            break;
+          default:
+            String value = serializer.serialize(target);
+            if (!StringUtils.isEmpty(value)) {
+              span.setAttribute(attributeName, value);
+            }
+        }
+      } else {
+        String value = serializer.serialize(target);
+        if (!StringUtils.isEmpty(value)) {
+          span.setAttribute(attributeName, value);
+        }
       }
     }
   }

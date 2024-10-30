@@ -25,6 +25,17 @@ final class AwsExperimentalAttributes {
   // TODO: Merge in gen_ai attributes in opentelemetry-semconv-incubating once upgrade to v1.26.0
   static final AttributeKey<String> GEN_AI_MODEL = stringKey("gen_ai.request.model");
   static final AttributeKey<String> GEN_AI_SYSTEM = stringKey("gen_ai.system");
+  static final AttributeKey<String> GEN_AI_REQUEST_MAX_TOKENS =
+      stringKey("gen_ai.request.max_tokens");
+  static final AttributeKey<String> GEN_AI_REQUEST_TEMPERATURE =
+      stringKey("gen_ai.request.temperature");
+  static final AttributeKey<String> GEN_AI_REQUEST_TOP_P = stringKey("gen_ai.request.top_p");
+  static final AttributeKey<String> GEN_AI_RESPONSE_FINISH_REASONS =
+      stringKey("gen_ai.response.finish_reasons");
+  static final AttributeKey<String> GEN_AI_USAGE_INPUT_TOKENS =
+      stringKey("gen_ai.usage.input_tokens");
+  static final AttributeKey<String> GEN_AI_USAGE_OUTPUT_TOKENS =
+      stringKey("gen_ai.usage.output_tokens");
 
   static final AttributeKey<String> AWS_STATE_MACHINE_ARN =
       stringKey("aws.stepfunctions.state_machine.arn");
@@ -44,4 +55,13 @@ final class AwsExperimentalAttributes {
       stringKey("aws.lambda.resource_mapping.id");
 
   private AwsExperimentalAttributes() {}
+
+  static boolean isGenAiInferenceAttribute(String attributeKey) {
+    return attributeKey.equals(GEN_AI_REQUEST_TEMPERATURE.getKey())
+        || attributeKey.equals(GEN_AI_REQUEST_MAX_TOKENS.getKey())
+        || attributeKey.equals(GEN_AI_REQUEST_TOP_P.getKey())
+        || attributeKey.equals(GEN_AI_RESPONSE_FINISH_REASONS.getKey())
+        || attributeKey.equals(GEN_AI_USAGE_INPUT_TOKENS.getKey())
+        || attributeKey.equals(GEN_AI_USAGE_OUTPUT_TOKENS.getKey());
+  }
 }

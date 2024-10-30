@@ -5,6 +5,13 @@ plugins {
 dependencies {
   implementation("io.opentelemetry.contrib:opentelemetry-aws-xray-propagator")
 
+  val jsonVersion = "20240303"
+  implementation("org.json:json") {
+    version {
+      strictly(jsonVersion)
+    }
+  }
+
   library("software.amazon.awssdk:aws-core:2.2.0")
   library("software.amazon.awssdk:sqs:2.2.0")
   library("software.amazon.awssdk:sns:2.2.0")
