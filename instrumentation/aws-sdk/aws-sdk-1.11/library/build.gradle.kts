@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   implementation("io.opentelemetry.contrib:opentelemetry-aws-xray-propagator")
+  implementation("org.json:json:20240303")
 
   library("com.amazonaws:aws-java-sdk-core:1.11.0")
   library("com.amazonaws:aws-java-sdk-sqs:1.11.106")

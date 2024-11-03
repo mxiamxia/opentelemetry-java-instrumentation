@@ -207,17 +207,216 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
     "AWSBedrockAgent"    | "GetAgent"      | "GET" | "/"                   | AWSBedrockAgentClientBuilder.standard()                             | { c -> c.getAgent(new GetAgentRequest().withAgentId("agentId")) } | ["aws.bedrock.agent.id": "agentId"] | ""
     "AWSBedrockAgent"    | "GetKnowledgeBase"      | "GET" | "/"                   | AWSBedrockAgentClientBuilder.standard()                             | { c -> c.getKnowledgeBase(new GetKnowledgeBaseRequest().withKnowledgeBaseId("knowledgeBaseId")) } | ["aws.bedrock.knowledge_base.id": "knowledgeBaseId"] | ""
     "AWSBedrockAgent"    | "GetDataSource"      | "GET" | "/"                   | AWSBedrockAgentClientBuilder.standard()                             | { c -> c.getDataSource(new GetDataSourceRequest().withDataSourceId("datasourceId").withKnowledgeBaseId("knowledgeBaseId")) } | ["aws.bedrock.data_source.id": "datasourceId"] | ""
-    "BedrockRuntime"    | "InvokeModel"      | "POST" | "/"                   | AmazonBedrockRuntimeClientBuilder.standard()                             |
-      { c -> c.invokeModel(
-        new InvokeModelRequest().withModelId("anthropic.claude-v2").withBody(StandardCharsets.UTF_8.encode(
-          "{\"prompt\":\"Hello, world!\",\"temperature\":0.7,\"top_p\":0.9,\"max_tokens_to_sample\":100}\n"
-        ))) } | ["gen_ai.request.model": "anthropic.claude-v2", "gen_ai.system": "aws_bedrock"] | """
+    "BedrockRuntime" | "InvokeModel" | "POST" | "/" | 
+    AmazonBedrockRuntimeClientBuilder.standard() |
+    { c -> 
+      c.invokeModel(
+        new InvokeModelRequest()
+          .withModelId("amazon.titan-text-premier-v1:0")
+          .withBody(StandardCharsets.UTF_8.encode('''
+            {
+              "inputText": "Hello, world!",
+              "textGenerationConfig": {
+                "temperature": 0.7,
+                "topP": 0.9,
+                "maxTokenCount": 100,
+              }
+            }
+          '''))
+      )
+    } | 
+    [
+      "gen_ai.request.model": "amazon.titan-text-premier-v1:0",
+      "gen_ai.system": "aws_bedrock",
+      "gen_ai.request.max_tokens": "100",
+      "gen_ai.request.temperature": "0.7",
+      "gen_ai.request.top_p": "0.9",
+      "gen_ai.response.finish_reasons": "[FINISHED]",
+      "gen_ai.usage.input_tokens": "5",
+      "gen_ai.usage.output_tokens": "42"
+    ] | 
+    '''
+    {
+      "inputTextTokenCount": 5,
+      "results": [
         {
-            "completion": " Here is a simple explanation of black ",
-            "stop_reason": "length",
-            "stop": "holes"
+          "tokenCount": 42,
+          "outputText": "Hi! I'm Titan, an AI assistant. How can I help you today?",
+          "completionReason": "FINISHED"
         }
-      """
+      ]
+    }
+    '''
+    "BedrockRuntime"    | "InvokeModel"      | "POST" | "/"                   | AmazonBedrockRuntimeClientBuilder.standard()                             |
+      { c -> 
+        c.invokeModel(
+          new InvokeModelRequest()
+            .withModelId("anthropic.claude-v2")
+            .withBody(StandardCharsets.UTF_8.encode('''
+              {
+                "prompt": "Hello, world!",
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "max_tokens": 100
+              }
+            '''))
+        )
+      } | 
+      [
+        "gen_ai.request.model": "anthropic.claude-v2",
+        "gen_ai.system": "aws_bedrock",
+        "gen_ai.request.max_tokens": "100",
+        "gen_ai.request.temperature": "0.7",
+        "gen_ai.request.top_p": "0.9",
+        "gen_ai.response.finish_reasons": "[end_turn]",
+        "gen_ai.usage.input_tokens": "2095",
+        "gen_ai.usage.output_tokens": "503"
+      ] | 
+      '''
+      {
+        "completion": " Here is a simple explanation of black ",
+        "stop_reason": "end_turn",
+        "stop": "holes",
+        "usage": {
+          "input_tokens": 2095,
+          "output_tokens": 503
+        }
+      }
+      '''
+    "BedrockRuntime" | "InvokeModel" | "POST" | "/" | 
+    AmazonBedrockRuntimeClientBuilder.standard() |
+    { c -> 
+      c.invokeModel(
+        new InvokeModelRequest()
+          .withModelId("cohere.command-r-v1:0")
+          .withBody(StandardCharsets.UTF_8.encode('''
+            {
+              "message": "Hello, world!",
+              "temperature": 0.7,
+              "p": 0.9,
+              "max_tokens": 100,
+            }
+          '''))
+      )
+    } | 
+    [
+      "gen_ai.request.model": "cohere.command-r-v1:0",
+      "gen_ai.system": "aws_bedrock",
+      "gen_ai.request.max_tokens": "100",
+      "gen_ai.request.temperature": "0.7",
+      "gen_ai.request.top_p": "0.9",
+      "gen_ai.response.finish_reasons": "[COMPLETE]",
+      "gen_ai.usage.input_tokens": "3",
+      "gen_ai.usage.output_tokens": "3"
+    ] | 
+    '''
+    {
+      "finish_reason": "COMPLETE",
+      "text": "Hello, world!"
+    }
+    '''
+    "BedrockRuntime" | "InvokeModel" | "POST" | "/" | 
+    AmazonBedrockRuntimeClientBuilder.standard() |
+    { c -> 
+      c.invokeModel(
+        new InvokeModelRequest()
+          .withModelId("ai21.jamba-1-5-mini-v1:0")
+          .withBody(StandardCharsets.UTF_8.encode('''
+            {
+              "prompt": "Hello, world!",
+              "temperature": 0.7,
+              "top_p": 0.9,
+              "max_tokens": 100,
+            }
+          '''))
+      )
+    } | 
+    [
+      "gen_ai.request.model": "ai21.jamba-1-5-mini-v1:0",
+      "gen_ai.system": "aws_bedrock",
+      "gen_ai.request.max_tokens": "100",
+      "gen_ai.request.temperature": "0.7",
+      "gen_ai.request.top_p": "0.9",
+      "gen_ai.response.finish_reasons": "[stop]",
+      "gen_ai.usage.input_tokens": "3",
+      "gen_ai.usage.output_tokens": "3"
+    ] | 
+    '''
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 3,
+        "completion_tokens": 3
+      }
+    }
+    '''
+    "BedrockRuntime" | "InvokeModel" | "POST" | "/" | 
+    AmazonBedrockRuntimeClientBuilder.standard() |
+    { c -> 
+      c.invokeModel(
+        new InvokeModelRequest()
+          .withModelId("meta.llama3-70b-instruct-v1:0")
+          .withBody(StandardCharsets.UTF_8.encode('''
+            {
+              "prompt": "Hello, world!",
+              "temperature": 0.7,
+              "top_p": 0.9,
+              "max_gen_len": 100,
+            }
+          '''))
+      )
+    } | 
+    [
+      "gen_ai.request.model": "meta.llama3-70b-instruct-v1:0",
+      "gen_ai.system": "aws_bedrock",
+      "gen_ai.request.max_tokens": "100",
+      "gen_ai.request.temperature": "0.7",
+      "gen_ai.request.top_p": "0.9",
+      "gen_ai.response.finish_reasons": "[stop]",
+      "gen_ai.usage.input_tokens": "3",
+      "gen_ai.usage.output_tokens": "3"
+    ] | 
+    '''
+    {
+      "stop_reason": "stop",
+      "prompt_token_count": 3,
+      "generation_token_count": 3
+    }
+    '''
+    "BedrockRuntime" | "InvokeModel" | "POST" | "/" | 
+    AmazonBedrockRuntimeClientBuilder.standard() |
+    { c -> 
+      c.invokeModel(
+        new InvokeModelRequest()
+          .withModelId("mistral.mistral-large-2402-v1:0")
+          .withBody(StandardCharsets.UTF_8.encode('''
+            {
+              "prompt": "Hello, world!",
+              "temperature": 0.7,
+              "top_p": 0.9,
+              "max_tokens": 100,
+            }
+          '''))
+      )
+    } | 
+    [
+      "gen_ai.request.model": "mistral.mistral-large-2402-v1:0",
+      "gen_ai.system": "aws_bedrock",
+      "gen_ai.request.max_tokens": "100",
+      "gen_ai.request.temperature": "0.7",
+      "gen_ai.request.top_p": "0.9",
+      "gen_ai.response.finish_reasons": "[stop]",
+      "gen_ai.usage.input_tokens": "3",
+      "gen_ai.usage.output_tokens": "3"
+    ] | 
+    '''
+    {
+      "outputs": [{
+        "stop_reason": "stop",
+        "text": "Hello, world!"
+      }],
+    }
+    '''
     "AWSStepFunctions" | "DescribeStateMachine" | "POST" | "/" | AWSStepFunctionsClientBuilder.standard()
     | { c -> c.describeStateMachine(new DescribeStateMachineRequest().withStateMachineArn("stateMachineArn")) }
     | ["aws.stepfunctions.state_machine.arn": "stateMachineArn"]
