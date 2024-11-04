@@ -109,8 +109,14 @@ class Serializer {
   private static Double getTemperature(JSONObject body) {
     // NOTE: There is no way to get the model id information without a large-effort refactor. As a
     // workaround we try every possible path and take whichever value is not null (there will only
-    // ever
-    // exist one non-null value at a time).
+    // ever exist one non-null value at a time).
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/textGenerationConfig/temperature"
+    // Anthropic Claude -> "/temperature"
+    // Cohere Command -> "/temperature"
+    // AI21 Jamba -> "/temperature"
+    // Meta Llama -> "/temperature"
+    // Mistral AI -> "/temperature"
     return Stream.of("/textGenerationConfig/temperature", "/temperature")
         .map(
             path -> {
@@ -127,11 +133,14 @@ class Serializer {
   }
 
   private static Integer getMaxTokens(JSONObject body) {
-    return Stream.of(
-            "/textGenerationConfig/maxTokenCount",
-            "/max_tokens",
-            "/max_tokens_to_sample",
-            "/max_gen_len")
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/textGenerationConfig/maxTokenCount"
+    // Anthropic Claude -> "/max_tokens"
+    // Cohere Command -> "/max_tokens"
+    // AI21 Jamba -> "/max_tokens"
+    // Meta Llama -> "/max_gen_len"
+    // Mistral AI -> "/max_tokens"
+    return Stream.of("/textGenerationConfig/maxTokenCount", "/max_tokens", "/max_gen_len")
         .map(
             path -> {
               try {
@@ -147,6 +156,13 @@ class Serializer {
   }
 
   private static Double getTopP(JSONObject body) {
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/textGenerationConfig/topP"
+    // Anthropic Claude -> "/top_p"
+    // Cohere Command -> "/p"
+    // AI21 Jamba -> "/top_p"
+    // Meta Llama -> "/top_p"
+    // Mistral AI -> "/top_p"
     return Stream.of("/textGenerationConfig/topP", "/top_p", "/p")
         .map(
             path -> {
@@ -163,6 +179,13 @@ class Serializer {
   }
 
   private static Integer getInputTokens(JSONObject body) {
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/inputTextTokenCount"
+    // Anthropic Claude -> "/usage/input_tokens"
+    // Cohere Command -> "/prompt"
+    // AI21 Jamba -> "/usage/prompt_tokens"
+    // Meta Llama -> "/prompt_token_count"
+    // Mistral AI -> "/prompt"
     Integer directTokenCount =
         Stream.of(
                 "/inputTextTokenCount",
@@ -206,6 +229,13 @@ class Serializer {
   }
 
   private static Integer getOutputTokens(JSONObject body) {
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/results/0/tokenCount"
+    // Anthropic Claude -> "/usage/output_tokens"
+    // Cohere Command -> "/generations/0/text"
+    // AI21 Jamba -> "/usage/completion_tokens"
+    // Meta Llama -> "/generation_token_count"
+    // Mistral AI -> "/outputs/0/text"
     Integer directTokenCount =
         Stream.of(
                 "/results/0/tokenCount",
@@ -249,6 +279,13 @@ class Serializer {
   }
 
   private static String getFinishReasons(JSONObject body) {
+    // Model -> Path Mapping:
+    // Amazon Titan -> "/results/0/completionReason"
+    // Anthropic Claude -> "/stop_reason"
+    // Cohere Command -> "/generations/0/finish_reason"
+    // AI21 Jamba -> "/choices/0/finish_reason"
+    // Meta Llama -> "/stop_reason"
+    // Mistral AI -> "/outputs/0/stop_reason"
     return Stream.of(
             "/results/0/completionReason",
             "/stop_reason",
