@@ -114,6 +114,7 @@ class Serializer {
     // Amazon Titan -> "/textGenerationConfig/temperature"
     // Anthropic Claude -> "/temperature"
     // Cohere Command -> "/temperature"
+    // Cohere Command R -> "/temperature"
     // AI21 Jamba -> "/temperature"
     // Meta Llama -> "/temperature"
     // Mistral AI -> "/temperature"
@@ -137,6 +138,7 @@ class Serializer {
     // Amazon Titan -> "/textGenerationConfig/maxTokenCount"
     // Anthropic Claude -> "/max_tokens"
     // Cohere Command -> "/max_tokens"
+    // Cohere Command R -> "/max_tokens"
     // AI21 Jamba -> "/max_tokens"
     // Meta Llama -> "/max_gen_len"
     // Mistral AI -> "/max_tokens"
@@ -160,6 +162,7 @@ class Serializer {
     // Amazon Titan -> "/textGenerationConfig/topP"
     // Anthropic Claude -> "/top_p"
     // Cohere Command -> "/p"
+    // Cohere Command R -> "/p"
     // AI21 Jamba -> "/top_p"
     // Meta Llama -> "/top_p"
     // Mistral AI -> "/top_p"
@@ -183,6 +186,7 @@ class Serializer {
     // Amazon Titan -> "/inputTextTokenCount"
     // Anthropic Claude -> "/usage/input_tokens"
     // Cohere Command -> "/prompt"
+    // Cohere Command R -> "/message"
     // AI21 Jamba -> "/usage/prompt_tokens"
     // Meta Llama -> "/prompt_token_count"
     // Mistral AI -> "/prompt"
@@ -209,7 +213,7 @@ class Serializer {
       return directTokenCount;
     }
 
-    return Stream.of("/prompt")
+    return Stream.of("/prompt", "/message")
         .map(
             path -> {
               try {
@@ -233,6 +237,7 @@ class Serializer {
     // Amazon Titan -> "/results/0/tokenCount"
     // Anthropic Claude -> "/usage/output_tokens"
     // Cohere Command -> "/generations/0/text"
+    // Cohere Command R -> "/text"
     // AI21 Jamba -> "/usage/completion_tokens"
     // Meta Llama -> "/generation_token_count"
     // Mistral AI -> "/outputs/0/text"
@@ -259,7 +264,7 @@ class Serializer {
       return directTokenCount;
     }
 
-    return Stream.of("/generations/0/text", "/outputs/0/text")
+    return Stream.of("/generations/0/text", "/outputs/0/text", "/text")
         .map(
             path -> {
               try {
@@ -283,6 +288,7 @@ class Serializer {
     // Amazon Titan -> "/results/0/completionReason"
     // Anthropic Claude -> "/stop_reason"
     // Cohere Command -> "/generations/0/finish_reason"
+    // Cohere Command R -> "/finish_reason"
     // AI21 Jamba -> "/choices/0/finish_reason"
     // Meta Llama -> "/stop_reason"
     // Mistral AI -> "/outputs/0/stop_reason"
@@ -291,7 +297,8 @@ class Serializer {
             "/stop_reason",
             "/generations/0/finish_reason",
             "/choices/0/finish_reason",
-            "/outputs/0/stop_reason")
+            "/outputs/0/stop_reason",
+            "/finish_reason")
         .map(
             path -> {
               try {
