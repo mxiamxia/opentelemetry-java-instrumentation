@@ -30,6 +30,8 @@ final class AwsExperimentalAttributes {
       stringKey("gen_ai.request.model");
   static final AttributeKey<String> AWS_BEDROCK_SYSTEM = stringKey("gen_ai.system");
 
+  static final AttributeKey<String> GEN_AI_REQUEST_MAX_TOKENS = stringKey("gen_ai.request.max_tokens");
+
   static final AttributeKey<String> AWS_STATE_MACHINE_ARN =
       stringKey("aws.stepfunctions.state_machine.arn");
 

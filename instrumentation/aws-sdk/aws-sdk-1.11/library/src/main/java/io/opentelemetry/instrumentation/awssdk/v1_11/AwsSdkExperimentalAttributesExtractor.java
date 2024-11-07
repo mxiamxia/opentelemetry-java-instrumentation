@@ -25,6 +25,7 @@ import static io.opentelemetry.instrumentation.awssdk.v1_11.AwsExperimentalAttri
 import static io.opentelemetry.instrumentation.awssdk.v1_11.AwsExperimentalAttributes.AWS_STEP_FUNCTIONS_ACTIVITY_ARN;
 import static io.opentelemetry.instrumentation.awssdk.v1_11.AwsExperimentalAttributes.AWS_STREAM_NAME;
 import static io.opentelemetry.instrumentation.awssdk.v1_11.AwsExperimentalAttributes.AWS_TABLE_NAME;
+import static io.opentelemetry.instrumentation.awssdk.v1_11.AwsExperimentalAttributes.GEN_AI_REQUEST_MAX_TOKENS;
 
 import com.amazonaws.AmazonWebServiceResponse;
 import com.amazonaws.Request;
@@ -144,6 +145,11 @@ class AwsSdkExperimentalAttributesExtractor
         Function<Object, String> getter = RequestAccess::getModelId;
         String modelId = getter.apply(originalRequest);
         attributes.put(AWS_BEDROCK_RUNTIME_MODEL_ID, modelId);
+
+        String maxTokens = BedrockRuntimeAccess.getMaxTokens(originalRequest);
+        if (maxTokens != null) {
+          attributes.put(GEN_AI_REQUEST_MAX_TOKENS, maxTokens);
+        }
         break;
       default:
         break;
