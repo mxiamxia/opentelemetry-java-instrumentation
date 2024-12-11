@@ -95,6 +95,7 @@ final class RequestAccess {
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/max_new_tokens"
   // Amazon Titan -> "/textGenerationConfig/maxTokenCount"
   // Anthropic Claude -> "/max_tokens"
   // Cohere Command -> "/max_tokens"
@@ -106,10 +107,15 @@ final class RequestAccess {
   static String getMaxTokens(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
-        jsonBody, "/max_tokens", "/max_gen_len", "/textGenerationConfig/maxTokenCount");
+        jsonBody,
+        "/max_tokens",
+        "/max_gen_len",
+        "/textGenerationConfig/maxTokenCount",
+        "/inferenceConfig/max_new_tokens");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/temperature"
   // Amazon Titan -> "/textGenerationConfig/temperature"
   // Anthropic Claude -> "/temperature"
   // Cohere Command -> "/temperature"
@@ -120,10 +126,15 @@ final class RequestAccess {
   @Nullable
   static String getTemperature(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
-    return findFirstMatchingPath(jsonBody, "/temperature", "/textGenerationConfig/temperature");
+    return findFirstMatchingPath(
+        jsonBody,
+        "/temperature",
+        "/textGenerationConfig/temperature",
+        "inferenceConfig/temperature");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/top_p"
   // Amazon Titan -> "/textGenerationConfig/topP"
   // Anthropic Claude -> "/top_p"
   // Cohere Command -> "/p"
@@ -134,10 +145,12 @@ final class RequestAccess {
   @Nullable
   static String getTopP(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
-    return findFirstMatchingPath(jsonBody, "/top_p", "/p", "/textGenerationConfig/topP");
+    return findFirstMatchingPath(
+        jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "/inferenceConfig/top_p");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/inputTokens"
   // Amazon Titan -> "/inputTextTokenCount"
   // Anthropic Claude -> "/usage/input_tokens"
   // Cohere Command -> "/prompt"
@@ -159,7 +172,8 @@ final class RequestAccess {
             "/inputTextTokenCount",
             "/prompt_token_count",
             "/usage/input_tokens",
-            "/usage/prompt_tokens");
+            "/usage/prompt_tokens",
+            "/usage/inputTokens");
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
@@ -170,6 +184,7 @@ final class RequestAccess {
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/outputTokens"
   // Amazon Titan -> "/results/0/tokenCount"
   // Anthropic Claude -> "/usage/output_tokens"
   // Cohere Command -> "/generations/0/text"
@@ -191,7 +206,8 @@ final class RequestAccess {
             "/generation_token_count",
             "/results/0/tokenCount",
             "/usage/output_tokens",
-            "/usage/completion_tokens");
+            "/usage/completion_tokens",
+            "/usage/outputTokens");
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
@@ -202,6 +218,7 @@ final class RequestAccess {
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/stopReason"
   // Amazon Titan -> "/results/0/completionReason"
   // Anthropic Claude -> "/stop_reason"
   // Cohere Command -> "/generations/0/finish_reason"
@@ -215,6 +232,7 @@ final class RequestAccess {
     String finishReason =
         findFirstMatchingPath(
             jsonBody,
+            "/stopReason",
             "/finish_reason",
             "/stop_reason",
             "/results/0/completionReason",
