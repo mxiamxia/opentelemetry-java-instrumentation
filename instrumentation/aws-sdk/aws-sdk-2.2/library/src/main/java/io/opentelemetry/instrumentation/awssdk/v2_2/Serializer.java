@@ -112,14 +112,15 @@ class Serializer {
   @Nullable
   private static String approximateTokenCount(Map<String, Object> jsonBody, String... textPaths) {
     return Arrays.stream(textPaths)
-        .map(path -> {
-          Object value = BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path);
-          if (value instanceof String) {
-            int tokenEstimate = (int) Math.ceil(((String) value).length() / 6.0);
-            return Integer.toString(tokenEstimate);
-          }
-          return null;
-        })
+        .map(
+            path -> {
+              Object value = BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path);
+              if (value instanceof String) {
+                int tokenEstimate = (int) Math.ceil(((String) value).length() / 6.0);
+                return Integer.toString(tokenEstimate);
+              }
+              return null;
+            })
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
@@ -135,12 +136,9 @@ class Serializer {
   // Mistral AI -> "/max_tokens"
   @Nullable
   private static String getMaxTokens(Map<String, Object> jsonBody) {
-    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/max_tokens",
-        "/max_gen_len",
-        "/textGenerationConfig/maxTokenCount"
-    ));
+    return String.valueOf(
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody, "/max_tokens", "/max_gen_len", "/textGenerationConfig/maxTokenCount"));
   }
 
   // Model -> Path Mapping:
@@ -153,11 +151,9 @@ class Serializer {
   // Mistral AI -> "/temperature"
   @Nullable
   private static String getTemperature(Map<String, Object> jsonBody) {
-    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/temperature",
-        "/textGenerationConfig/temperature"
-    ));
+    return String.valueOf(
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody, "/temperature", "/textGenerationConfig/temperature"));
   }
 
   // Model -> Path Mapping:
@@ -170,12 +166,9 @@ class Serializer {
   // Mistral AI -> "/top_p"
   @Nullable
   private static String getTopP(Map<String, Object> jsonBody) {
-    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/top_p",
-        "/p",
-        "/textGenerationConfig/topP"
-    ));
+    return String.valueOf(
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody, "/top_p", "/p", "/textGenerationConfig/topP"));
   }
 
   // Model -> Path Mapping:
@@ -188,15 +181,16 @@ class Serializer {
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
   private static String getFinishReasons(Map<String, Object> jsonBody) {
-    String finishReason = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/finish_reason",
-        "/stop_reason",
-        "/results/0/completionReason",
-        "/generations/0/finish_reason",
-        "/choices/0/finish_reason",
-        "/outputs/0/stop_reason"
-    ));
+    String finishReason =
+        String.valueOf(
+            BedrockJsonParser.JsonPathResolver.resolvePath(
+                jsonBody,
+                "/finish_reason",
+                "/stop_reason",
+                "/results/0/completionReason",
+                "/generations/0/finish_reason",
+                "/choices/0/finish_reason",
+                "/outputs/0/stop_reason"));
 
     return finishReason != null ? "[" + finishReason + "]" : null;
   }
@@ -212,24 +206,21 @@ class Serializer {
   @Nullable
   private static String getInputTokens(Map<String, Object> jsonBody) {
     // Try direct tokens counts first
-    String directCount = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/inputTextTokenCount",
-        "/prompt_token_count",
-        "/usage/input_tokens",
-        "/usage/prompt_tokens"
-    ));
+    String directCount =
+        String.valueOf(
+            BedrockJsonParser.JsonPathResolver.resolvePath(
+                jsonBody,
+                "/inputTextTokenCount",
+                "/prompt_token_count",
+                "/usage/input_tokens",
+                "/usage/prompt_tokens"));
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(
-        jsonBody,
-        "/prompt",
-        "/message"
-    );
+    return approximateTokenCount(jsonBody, "/prompt", "/message");
   }
 
   // Model -> Path Mapping:
@@ -243,23 +234,20 @@ class Serializer {
   @Nullable
   private static String getOutputTokens(Map<String, Object> jsonBody) {
     // Try direct token counts first
-    String directCount = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
-        jsonBody,
-        "/generation_token_count",
-        "/results/0/tokenCount",
-        "/usage/output_tokens",
-        "/usage/completion_tokens"
-    ));
+    String directCount =
+        String.valueOf(
+            BedrockJsonParser.JsonPathResolver.resolvePath(
+                jsonBody,
+                "/generation_token_count",
+                "/results/0/tokenCount",
+                "/usage/output_tokens",
+                "/usage/completion_tokens"));
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(
-        jsonBody,
-        "/text",
-        "/outputs/0/text"
-    );
+    return approximateTokenCount(jsonBody, "/text", "/outputs/0/text");
   }
 }

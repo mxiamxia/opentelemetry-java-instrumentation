@@ -1,9 +1,14 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.opentelemetry.instrumentation.awssdk.v2_2;
 
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 
 public class BedrockJsonParser {
 
@@ -46,7 +51,9 @@ public class BedrockJsonParser {
       StringBuilder result = new StringBuilder();
       while (currentChar() != '"') {
         // Handle escaped quotes within the string
-        if (currentChar() == '\\' && position + 1 < json.length() && json.charAt(position + 1) == '"') {
+        if (currentChar() == '\\'
+            && position + 1 < json.length()
+            && json.charAt(position + 1) == '"') {
           result.append('"');
           position += 2; // Skip the backslash and the escaped quote
         } else {
@@ -88,8 +95,8 @@ public class BedrockJsonParser {
       int start = position;
 
       // Consume digits and the optional decimal point
-      while (position < json.length() && (Character.isDigit(json.charAt(position))
-          || json.charAt(position) == '.')) {
+      while (position < json.length()
+          && (Character.isDigit(json.charAt(position)) || json.charAt(position) == '.')) {
         position++;
       }
 
