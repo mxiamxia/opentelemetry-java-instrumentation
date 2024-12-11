@@ -106,11 +106,7 @@ final class RequestAccess {
   static String getMaxTokens(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
-        jsonBody,
-        "/max_tokens",
-        "/max_gen_len",
-        "/textGenerationConfig/maxTokenCount"
-    );
+        jsonBody, "/max_tokens", "/max_gen_len", "/textGenerationConfig/maxTokenCount");
   }
 
   // Model -> Path Mapping:
@@ -124,11 +120,7 @@ final class RequestAccess {
   @Nullable
   static String getTemperature(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
-    return findFirstMatchingPath(
-        jsonBody,
-        "/temperature",
-        "/textGenerationConfig/temperature"
-    );
+    return findFirstMatchingPath(jsonBody, "/temperature", "/textGenerationConfig/temperature");
   }
 
   // Model -> Path Mapping:
@@ -142,12 +134,7 @@ final class RequestAccess {
   @Nullable
   static String getTopP(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
-    return findFirstMatchingPath(
-        jsonBody,
-        "/top_p",
-        "/p",
-        "/textGenerationConfig/topP"
-    );
+    return findFirstMatchingPath(jsonBody, "/top_p", "/p", "/textGenerationConfig/topP");
   }
 
   // Model -> Path Mapping:
@@ -166,13 +153,13 @@ final class RequestAccess {
     }
 
     // Try direct token counts first
-    String directCount = findFirstMatchingPath(
-        jsonBody,
-        "/inputTextTokenCount",
-        "/prompt_token_count",
-        "/usage/input_tokens",
-        "/usage/prompt_tokens"
-    );
+    String directCount =
+        findFirstMatchingPath(
+            jsonBody,
+            "/inputTextTokenCount",
+            "/prompt_token_count",
+            "/usage/input_tokens",
+            "/usage/prompt_tokens");
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
@@ -198,13 +185,13 @@ final class RequestAccess {
     }
 
     // Try direct token counts first
-    String directCount = findFirstMatchingPath(
-        jsonBody,
-        "/generation_token_count",
-        "/results/0/tokenCount",
-        "/usage/output_tokens",
-        "/usage/completion_tokens"
-    );
+    String directCount =
+        findFirstMatchingPath(
+            jsonBody,
+            "/generation_token_count",
+            "/results/0/tokenCount",
+            "/usage/output_tokens",
+            "/usage/completion_tokens");
 
     if (directCount != null && !directCount.equals("null")) {
       return directCount;
@@ -225,15 +212,15 @@ final class RequestAccess {
   @Nullable
   static String getFinishReasons(Object target) {
     Map<String, Object> jsonBody = getJsonBody(target);
-    String finishReason = findFirstMatchingPath(
-        jsonBody,
-        "/finish_reason",
-        "/stop_reason",
-        "/results/0/completionReason",
-        "/generations/0/finish_reason",
-        "/choices/0/finish_reason",
-        "/outputs/0/stop_reason"
-    );
+    String finishReason =
+        findFirstMatchingPath(
+            jsonBody,
+            "/finish_reason",
+            "/stop_reason",
+            "/results/0/completionReason",
+            "/generations/0/finish_reason",
+            "/choices/0/finish_reason",
+            "/outputs/0/stop_reason");
 
     return finishReason != null ? "[" + finishReason + "]" : null;
   }
