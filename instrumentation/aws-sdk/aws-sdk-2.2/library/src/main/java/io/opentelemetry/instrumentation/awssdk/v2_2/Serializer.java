@@ -5,17 +5,14 @@
 
 package io.opentelemetry.instrumentation.awssdk.v2_2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.SdkPojo;
@@ -26,8 +23,6 @@ import software.amazon.awssdk.utils.IoUtils;
 import software.amazon.awssdk.utils.StringUtils;
 
 class Serializer {
-
-  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Nullable
   String serialize(Object target) {
@@ -52,10 +47,10 @@ class Serializer {
   @Nullable
   String serialize(String attributeName, Object target) {
     try {
-      JsonNode jsonBody;
+      // Extract JSON string from target if it is a Bedrock Runtime JSON blob
+      String jsonString;
       if (target instanceof SdkBytes) {
-        String jsonString = ((SdkBytes) target).asUtf8String();
-        jsonBody = objectMapper.readTree(jsonString);
+        jsonString = ((SdkBytes) target).asUtf8String();
       } else {
         if (target != null) {
           return target.toString();
@@ -63,6 +58,11 @@ class Serializer {
         return null;
       }
 
+      // Parse the JSON string into a Map
+      BedrockJsonParser.JsonParser parser = new BedrockJsonParser.JsonParser(jsonString);
+      Map<String, Object> jsonBody = parser.parse();
+
+      // Use attribute name to extract the corresponding value
       switch (attributeName) {
         case "gen_ai.request.max_tokens":
           return getMaxTokens(jsonBody);
@@ -79,7 +79,7 @@ class Serializer {
         default:
           return null;
       }
-    } catch (JsonProcessingException e) {
+    } catch (RuntimeException e) {
       return null;
     }
   }
@@ -110,41 +110,16 @@ class Serializer {
   }
 
   @Nullable
-  private static String findFirstMatchingPath(JsonNode jsonBody, String... paths) {
-    if (jsonBody == null) {
-      return null;
-    }
-
-    return Stream.of(paths)
-        .map(
-            path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                return node.asText();
-              }
-              return null;
-            })
-        .filter(Objects::nonNull)
-        .findFirst()
-        .orElse(null);
-  }
-
-  @Nullable
-  private static String approximateTokenCount(JsonNode jsonBody, String... textPaths) {
-    if (jsonBody == null) {
-      return null;
-    }
-
-    return Stream.of(textPaths)
-        .map(
-            path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                int tokenEstimate = (int) Math.ceil(node.asText().length() / 6.0);
-                return Integer.toString(tokenEstimate);
-              }
-              return null;
-            })
+  private static String approximateTokenCount(Map<String, Object> jsonBody, String... textPaths) {
+    return Arrays.stream(textPaths)
+        .map(path -> {
+          Object value = BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path);
+          if (value instanceof String) {
+            int tokenEstimate = (int) Math.ceil(((String) value).length() / 6.0);
+            return Integer.toString(tokenEstimate);
+          }
+          return null;
+        })
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
@@ -159,9 +134,13 @@ class Serializer {
   // Meta Llama -> "/max_gen_len"
   // Mistral AI -> "/max_tokens"
   @Nullable
-  private static String getMaxTokens(JsonNode jsonBody) {
-    return findFirstMatchingPath(
-        jsonBody, "/textGenerationConfig/maxTokenCount", "/max_tokens", "/max_gen_len");
+  private static String getMaxTokens(Map<String, Object> jsonBody) {
+    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/max_tokens",
+        "/max_gen_len",
+        "/textGenerationConfig/maxTokenCount"
+    ));
   }
 
   // Model -> Path Mapping:
@@ -173,8 +152,12 @@ class Serializer {
   // Meta Llama -> "/temperature"
   // Mistral AI -> "/temperature"
   @Nullable
-  private static String getTemperature(JsonNode jsonBody) {
-    return findFirstMatchingPath(jsonBody, "/textGenerationConfig/temperature", "/temperature");
+  private static String getTemperature(Map<String, Object> jsonBody) {
+    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/temperature",
+        "/textGenerationConfig/temperature"
+    ));
   }
 
   // Model -> Path Mapping:
@@ -186,8 +169,13 @@ class Serializer {
   // Meta Llama -> "/top_p"
   // Mistral AI -> "/top_p"
   @Nullable
-  private static String getTopP(JsonNode jsonBody) {
-    return findFirstMatchingPath(jsonBody, "/textGenerationConfig/topP", "/top_p", "/p");
+  private static String getTopP(Map<String, Object> jsonBody) {
+    return String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/top_p",
+        "/p",
+        "/textGenerationConfig/topP"
+    ));
   }
 
   // Model -> Path Mapping:
@@ -199,16 +187,16 @@ class Serializer {
   // Meta Llama -> "/stop_reason"
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
-  private static String getFinishReasons(JsonNode jsonBody) {
-    String finishReason =
-        findFirstMatchingPath(
-            jsonBody,
-            "/results/0/completionReason",
-            "/stop_reason",
-            "/generations/0/finish_reason",
-            "/choices/0/finish_reason",
-            "/outputs/0/stop_reason",
-            "/finish_reason");
+  private static String getFinishReasons(Map<String, Object> jsonBody) {
+    String finishReason = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/finish_reason",
+        "/stop_reason",
+        "/results/0/completionReason",
+        "/generations/0/finish_reason",
+        "/choices/0/finish_reason",
+        "/outputs/0/stop_reason"
+    ));
 
     return finishReason != null ? "[" + finishReason + "]" : null;
   }
@@ -222,22 +210,26 @@ class Serializer {
   // Meta Llama -> "/prompt_token_count"
   // Mistral AI -> "/prompt"
   @Nullable
-  private static String getInputTokens(JsonNode jsonBody) {
+  private static String getInputTokens(Map<String, Object> jsonBody) {
     // Try direct tokens counts first
-    String directCount =
-        findFirstMatchingPath(
-            jsonBody,
-            "/inputTextTokenCount",
-            "/usage/input_tokens",
-            "/usage/prompt_tokens",
-            "/prompt_token_count");
+    String directCount = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/inputTextTokenCount",
+        "/prompt_token_count",
+        "/usage/input_tokens",
+        "/usage/prompt_tokens"
+    ));
 
-    if (directCount != null) {
+    if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(jsonBody, "/prompt", "/message");
+    return approximateTokenCount(
+        jsonBody,
+        "/prompt",
+        "/message"
+    );
   }
 
   // Model -> Path Mapping:
@@ -249,21 +241,25 @@ class Serializer {
   // Meta Llama -> "/generation_token_count"
   // Mistral AI -> "/outputs/0/text"
   @Nullable
-  private static String getOutputTokens(JsonNode jsonBody) {
+  private static String getOutputTokens(Map<String, Object> jsonBody) {
     // Try direct token counts first
-    String directCount =
-        findFirstMatchingPath(
-            jsonBody,
-            "/results/0/tokenCount",
-            "/usage/output_tokens",
-            "/usage/completion_tokens",
-            "/generation_token_count");
+    String directCount = String.valueOf(BedrockJsonParser.JsonPathResolver.resolvePath(
+        jsonBody,
+        "/generation_token_count",
+        "/results/0/tokenCount",
+        "/usage/output_tokens",
+        "/usage/completion_tokens"
+    ));
 
-    if (directCount != null) {
+    if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(jsonBody, "/outputs/0/text", "/text");
+    return approximateTokenCount(
+        jsonBody,
+        "/text",
+        "/outputs/0/text"
+    );
   }
 }
