@@ -17,12 +17,16 @@ public class LlmJson {
     this.jsonBody = jsonBody;
   }
 
+  public Map<String, Object> getJsonBody() {
+    return jsonBody;
+  }
+
   @Nullable
   private String approximateTokenCount(String... textPaths) {
     return Arrays.stream(textPaths)
         .map(
             path -> {
-              Object value = BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path);
+              Object value = BedrockJsonParser.JsonPathResolver.resolvePath(this, path);
               if (value instanceof String) {
                 int tokenEstimate = (int) Math.ceil(((String) value).length() / 6.0);
                 return Integer.toString(tokenEstimate);
@@ -47,7 +51,7 @@ public class LlmJson {
   public String getMaxTokens() {
     Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody,
+            this,
             "/max_tokens",
             "/max_gen_len",
             "/textGenerationConfig/maxTokenCount",
@@ -68,7 +72,7 @@ public class LlmJson {
   public String getTemperature() {
     Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody,
+            this,
             "/temperature",
             "/textGenerationConfig/temperature",
             "inferenceConfig/temperature");
@@ -88,7 +92,7 @@ public class LlmJson {
   public String getTopP() {
     Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "inferenceConfig/top_p");
+            this, "/top_p", "/p", "/textGenerationConfig/topP", "inferenceConfig/top_p");
     return value != null ? String.valueOf(value) : null;
   }
 
@@ -105,7 +109,7 @@ public class LlmJson {
   public String getFinishReasons() {
     Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody,
+            this,
             "/stopReason",
             "/finish_reason",
             "/stop_reason",
@@ -131,7 +135,7 @@ public class LlmJson {
     // Try direct tokens counts first
     Object directCount =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody,
+            this,
             "/inputTextTokenCount",
             "/prompt_token_count",
             "/usage/input_tokens",
@@ -162,7 +166,7 @@ public class LlmJson {
     // Try direct token counts first
     Object directCount =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody,
+            this,
             "/generation_token_count",
             "/results/0/tokenCount",
             "/usage/output_tokens",

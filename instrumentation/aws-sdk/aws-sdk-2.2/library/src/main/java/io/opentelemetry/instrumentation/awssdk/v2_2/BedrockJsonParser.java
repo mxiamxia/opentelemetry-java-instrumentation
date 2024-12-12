@@ -166,9 +166,9 @@ public class BedrockJsonParser {
       throw new UnsupportedOperationException("Utility class");
     }
 
-    public static Object resolvePath(Map<String, Object> json, String... paths) {
+    public static Object resolvePath(LlmJson llmJson, String... paths) {
       for (String path : paths) {
-        Object value = resolvePath(json, path);
+        Object value = resolvePath(llmJson.getJsonBody(), path);
         if (value != null) {
           return value;
         }
