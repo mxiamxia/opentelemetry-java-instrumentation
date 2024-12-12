@@ -56,7 +56,7 @@ class Serializer {
         return null;
       }
 
-      // Parse the JSON string into a Map
+      // Parse the LLM JSON string into a Map
       LlmJson llmJson = BedrockJsonParser.parse(jsonString);
 
       // Use attribute name to extract the corresponding value

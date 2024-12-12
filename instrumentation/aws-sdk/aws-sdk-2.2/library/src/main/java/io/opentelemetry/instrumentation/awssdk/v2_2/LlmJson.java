@@ -45,13 +45,14 @@ public class LlmJson {
   // Mistral AI -> "/max_tokens"
   @Nullable
   public String getMaxTokens() {
-    return String.valueOf(
+    Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
             jsonBody,
             "/max_tokens",
             "/max_gen_len",
             "/textGenerationConfig/maxTokenCount",
-            "inferenceConfig/max_new_tokens"));
+            "inferenceConfig/max_new_tokens");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
@@ -65,12 +66,13 @@ public class LlmJson {
   // Mistral AI -> "/temperature"
   @Nullable
   public String getTemperature() {
-    return String.valueOf(
+    Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
             jsonBody,
             "/temperature",
             "/textGenerationConfig/temperature",
-            "inferenceConfig/temperature"));
+            "inferenceConfig/temperature");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
@@ -84,9 +86,10 @@ public class LlmJson {
   // Mistral AI -> "/top_p"
   @Nullable
   public String getTopP() {
-    return String.valueOf(
+    Object value =
         BedrockJsonParser.JsonPathResolver.resolvePath(
-            jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "inferenceConfig/top_p"));
+            jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "inferenceConfig/top_p");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
@@ -100,19 +103,18 @@ public class LlmJson {
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
   public String getFinishReasons() {
-    String finishReason =
-        String.valueOf(
-            BedrockJsonParser.JsonPathResolver.resolvePath(
-                jsonBody,
-                "/stopReason",
-                "/finish_reason",
-                "/stop_reason",
-                "/results/0/completionReason",
-                "/generations/0/finish_reason",
-                "/choices/0/finish_reason",
-                "/outputs/0/stop_reason"));
+    Object value =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody,
+            "/stopReason",
+            "/finish_reason",
+            "/stop_reason",
+            "/results/0/completionReason",
+            "/generations/0/finish_reason",
+            "/choices/0/finish_reason",
+            "/outputs/0/stop_reason");
 
-    return finishReason != null ? "[" + finishReason + "]" : null;
+    return value != null ? "[" + value + "]" : null;
   }
 
   // Model -> Path Mapping:
@@ -127,22 +129,23 @@ public class LlmJson {
   @Nullable
   public String getInputTokens() {
     // Try direct tokens counts first
-    String directCount =
-        String.valueOf(
-            BedrockJsonParser.JsonPathResolver.resolvePath(
-                jsonBody,
-                "/inputTextTokenCount",
-                "/prompt_token_count",
-                "/usage/input_tokens",
-                "/usage/prompt_tokens",
-                "/usage/inputTokens"));
+    Object directCount =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody,
+            "/inputTextTokenCount",
+            "/prompt_token_count",
+            "/usage/input_tokens",
+            "/usage/prompt_tokens",
+            "/usage/inputTokens");
 
-    if (directCount != null && !directCount.equals("null")) {
-      return directCount;
+    if (directCount != null) {
+      return String.valueOf(directCount);
     }
 
     // Fall back to token approximation
-    return approximateTokenCount("/prompt", "/message");
+    Object approxTokenCount = approximateTokenCount("/prompt", "/message");
+
+    return approxTokenCount != null ? String.valueOf(approxTokenCount) : null;
   }
 
   // Model -> Path Mapping:
@@ -157,21 +160,22 @@ public class LlmJson {
   @Nullable
   public String getOutputTokens() {
     // Try direct token counts first
-    String directCount =
-        String.valueOf(
-            BedrockJsonParser.JsonPathResolver.resolvePath(
-                jsonBody,
-                "/generation_token_count",
-                "/results/0/tokenCount",
-                "/usage/output_tokens",
-                "/usage/completion_tokens",
-                "/usage/outputTokens"));
+    Object directCount =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody,
+            "/generation_token_count",
+            "/results/0/tokenCount",
+            "/usage/output_tokens",
+            "/usage/completion_tokens",
+            "/usage/outputTokens");
 
-    if (directCount != null && !directCount.equals("null")) {
-      return directCount;
+    if (directCount != null) {
+      return String.valueOf(directCount);
     }
 
     // Fall back to token approximation
-    return approximateTokenCount("/text", "/outputs/0/text");
+    Object approxTokenCount = approximateTokenCount("/text", "/outputs/0/text");
+
+    return approxTokenCount != null ? String.valueOf(approxTokenCount) : null;
   }
 }
