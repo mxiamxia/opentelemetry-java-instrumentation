@@ -17,7 +17,13 @@ public class BedrockJsonParser {
     throw new UnsupportedOperationException("Utility class");
   }
 
-  public static class JsonParser {
+  public static LlmJson parse(String jsonString) {
+    JsonParser parser = new JsonParser(jsonString);
+    Map<String, Object> jsonBody = parser.parse();
+    return new LlmJson(jsonBody);
+  }
+
+  static class JsonParser {
     private final String json;
     private int position;
 
@@ -153,7 +159,7 @@ public class BedrockJsonParser {
   }
 
   // Resolves paths in a JSON structure
-  public static class JsonPathResolver {
+  static class JsonPathResolver {
 
     // Private constructor to prevent instantiation
     private JsonPathResolver() {
