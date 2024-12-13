@@ -252,4 +252,16 @@ public class BedrockJsonParser {
       return current;
     }
   }
+
+  public static class LlmJson {
+    private final Map<String, Object> jsonBody;
+
+    public LlmJson(Map<String, Object> jsonBody) {
+      this.jsonBody = jsonBody;
+    }
+
+    public Map<String, Object> getJsonBody() {
+      return jsonBody;
+    }
+  }
 }

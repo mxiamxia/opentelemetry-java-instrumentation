@@ -18,7 +18,7 @@ public class BedrockJsonParserTest {
     String json = "{\"key\":\"value\",\"number\":123,\"boolean\":true}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     assertThat(parsedJson.getJsonBody()).containsEntry("key", "value");
@@ -32,7 +32,7 @@ public class BedrockJsonParserTest {
     String json = "{\"parent\":{\"child\":\"value\"}}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     Object parentObj = parsedJson.getJsonBody().get("parent");
@@ -50,7 +50,7 @@ public class BedrockJsonParserTest {
         "{\"escaped\":\"Line1\\nLine2\\tTabbed\\\"Quoted\\\"\\bBackspace\\fFormfeed\\rCarriageReturn\\\\Backslash\\/Slash\\u0041\"}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     assertThat(parsedJson.getJsonBody())
@@ -65,7 +65,7 @@ public class BedrockJsonParserTest {
     String json = "{\"unicode\":\"\\u0041\\u0042\\u0043\"}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     assertThat(parsedJson.getJsonBody()).containsEntry("unicode", "ABC");
@@ -77,7 +77,7 @@ public class BedrockJsonParserTest {
     String json = "{}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     assertThat(parsedJson.getJsonBody()).isEmpty();
@@ -89,7 +89,7 @@ public class BedrockJsonParserTest {
     String json = "{\"array\":[]}";
 
     // when
-    LlmJson parsedJson = BedrockJsonParser.parse(json);
+    BedrockJsonParser.LlmJson parsedJson = BedrockJsonParser.parse(json);
 
     // then
     assertThat(parsedJson.getJsonBody()).containsKey("array");
