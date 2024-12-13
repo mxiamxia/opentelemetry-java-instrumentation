@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -28,7 +27,7 @@ final class RequestAccess {
       };
 
   @Nullable
-  private static Map<String, Object> parseTargetBody(ByteBuffer buffer) {
+  private static BedrockJsonParser.LlmJson parseTargetBody(ByteBuffer buffer) {
     try {
       byte[] bytes;
       // Create duplicate to avoid mutating the original buffer position
@@ -43,16 +42,15 @@ final class RequestAccess {
         bytes = new byte[buffer.remaining()];
         buffer.get(bytes);
       }
-      String json = new String(bytes, StandardCharsets.UTF_8); // Convert to String
-      BedrockJsonParser.JsonParser parser = new BedrockJsonParser.JsonParser(json);
-      return parser.parse();
+      String jsonString = new String(bytes, StandardCharsets.UTF_8); // Convert to String
+      return BedrockJsonParser.parse(jsonString);
     } catch (RuntimeException e) {
       return null;
     }
   }
 
   @Nullable
-  private static Map<String, Object> getJsonBody(Object target) {
+  private static BedrockJsonParser.LlmJson getJsonBody(Object target) {
     if (target == null) {
       return null;
     }
@@ -67,7 +65,7 @@ final class RequestAccess {
   }
 
   @Nullable
-  private static String findFirstMatchingPath(Map<String, Object> jsonBody, String... paths) {
+  private static String findFirstMatchingPath(BedrockJsonParser.LlmJson jsonBody, String... paths) {
     if (jsonBody == null) {
       return null;
     }
@@ -81,7 +79,8 @@ final class RequestAccess {
   }
 
   @Nullable
-  private static String approximateTokenCount(Map<String, Object> jsonBody, String... textPaths) {
+  private static String approximateTokenCount(
+      BedrockJsonParser.LlmJson jsonBody, String... textPaths) {
     if (jsonBody == null) {
       return null;
     }
@@ -105,7 +104,7 @@ final class RequestAccess {
   // Mistral AI -> "/max_tokens"
   @Nullable
   static String getMaxTokens(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
         jsonBody,
         "/max_tokens",
@@ -125,7 +124,7 @@ final class RequestAccess {
   // Mistral AI -> "/temperature"
   @Nullable
   static String getTemperature(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
         jsonBody,
         "/temperature",
@@ -144,7 +143,7 @@ final class RequestAccess {
   // Mistral AI -> "/top_p"
   @Nullable
   static String getTopP(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
         jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "/inferenceConfig/top_p");
   }
@@ -160,7 +159,7 @@ final class RequestAccess {
   // Mistral AI -> "/prompt"
   @Nullable
   static String getInputTokens(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     if (jsonBody == null) {
       return null;
     }
@@ -194,7 +193,7 @@ final class RequestAccess {
   // Mistral AI -> "/outputs/0/text"
   @Nullable
   static String getOutputTokens(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     if (jsonBody == null) {
       return null;
     }
@@ -228,7 +227,7 @@ final class RequestAccess {
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
   static String getFinishReasons(Object target) {
-    Map<String, Object> jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     String finishReason =
         findFirstMatchingPath(
             jsonBody,

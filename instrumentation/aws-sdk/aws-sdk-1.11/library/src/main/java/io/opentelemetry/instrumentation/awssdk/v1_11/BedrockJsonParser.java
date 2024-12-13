@@ -17,7 +17,13 @@ public class BedrockJsonParser {
     throw new UnsupportedOperationException("Utility class");
   }
 
-  public static class JsonParser {
+  public static LlmJson parse(String jsonString) {
+    JsonParser parser = new JsonParser(jsonString);
+    Map<String, Object> jsonBody = parser.parse();
+    return new LlmJson(jsonBody);
+  }
+
+  static class JsonParser {
     private final String json;
     private int position;
 
@@ -36,6 +42,10 @@ public class BedrockJsonParser {
       return json.charAt(position);
     }
 
+    private static boolean isHexDigit(char c) {
+      return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    }
+
     private void expect(char c) {
       skipWhitespace();
       if (currentChar() != c) {
@@ -50,18 +60,61 @@ public class BedrockJsonParser {
       expect('"'); // Ensure the string starts with a quote
       StringBuilder result = new StringBuilder();
       while (currentChar() != '"') {
-        // Handle escaped quotes within the string
-        if (currentChar() == '\\'
-            && position + 1 < json.length()
-            && json.charAt(position + 1) == '"') {
-          result.append('"');
-          position += 2;
+        // Handle escape sequences
+        if (currentChar() == '\\') {
+          position++; // Move past the backslash
+          if (position >= json.length()) {
+            throw new IllegalArgumentException("Unexpected end of input in string escape sequence");
+          }
+          char escapeChar = currentChar();
+          switch (escapeChar) {
+            case '"':
+            case '\\':
+            case '/':
+              result.append(escapeChar);
+              break;
+            case 'b':
+              result.append('\b');
+              break;
+            case 'f':
+              result.append('\f');
+              break;
+            case 'n':
+              result.append('\n');
+              break;
+            case 'r':
+              result.append('\r');
+              break;
+            case 't':
+              result.append('\t');
+              break;
+            case 'u': // Unicode escape sequence
+              if (position + 4 >= json.length()) {
+                throw new IllegalArgumentException("Invalid unicode escape sequence in string");
+              }
+              char[] hexChars = new char[4];
+              for (int i = 0; i < 4; i++) {
+                position++; // Move to the next character
+                char hexChar = json.charAt(position);
+                if (!isHexDigit(hexChar)) {
+                  throw new IllegalArgumentException(
+                      "Invalid hexadecimal digit in unicode escape sequence");
+                }
+                hexChars[i] = hexChar;
+              }
+              int unicodeValue = Integer.parseInt(new String(hexChars), 16);
+              result.append((char) unicodeValue);
+              break;
+            default:
+              throw new IllegalArgumentException("Invalid escape character: \\" + escapeChar);
+          }
+          position++;
         } else {
           result.append(currentChar());
           position++;
         }
       }
-      position++;
+      position++; // Skip closing quote
       return result.toString();
     }
 
@@ -153,16 +206,16 @@ public class BedrockJsonParser {
   }
 
   // Resolves paths in a JSON structure
-  public static class JsonPathResolver {
+  static class JsonPathResolver {
 
     // Private constructor to prevent instantiation
     private JsonPathResolver() {
       throw new UnsupportedOperationException("Utility class");
     }
 
-    public static Object resolvePath(Map<String, Object> json, String... paths) {
+    public static Object resolvePath(LlmJson llmJson, String... paths) {
       for (String path : paths) {
-        Object value = resolvePath(json, path);
+        Object value = resolvePath(llmJson.getJsonBody(), path);
         if (value != null) {
           return value;
         }
@@ -197,6 +250,18 @@ public class BedrockJsonParser {
         }
       }
       return current;
+    }
+  }
+
+  public static class LlmJson {
+    private final Map<String, Object> jsonBody;
+
+    public LlmJson(Map<String, Object> jsonBody) {
+      this.jsonBody = jsonBody;
+    }
+
+    public Map<String, Object> getJsonBody() {
+      return jsonBody;
     }
   }
 }
