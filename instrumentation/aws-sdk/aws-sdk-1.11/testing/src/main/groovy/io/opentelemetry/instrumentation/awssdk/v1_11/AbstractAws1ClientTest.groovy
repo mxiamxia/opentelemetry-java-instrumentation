@@ -228,7 +228,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "ai21.jamba-1-5-mini-v1:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "1000",
         "gen_ai.request.temperature": "0.7",
         "gen_ai.request.top_p": "0.8",
@@ -268,7 +268,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "amazon.titan-text-premier-v1:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "100",
         "gen_ai.request.temperature": "0.7",
         "gen_ai.request.top_p": "0.9",
@@ -310,7 +310,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "100",
         "gen_ai.request.temperature": "0.7",
         "gen_ai.request.top_p": "0.9",
@@ -345,7 +345,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "meta.llama3-70b-instruct-v1:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "128",
         "gen_ai.request.temperature": "0.1",
         "gen_ai.request.top_p": "0.9",
@@ -378,7 +378,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "cohere.command-r-v1:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "4096",
         "gen_ai.request.temperature": "0.8",
         "gen_ai.request.top_p": "0.45",
@@ -410,7 +410,7 @@ abstract class AbstractAws1ClientTest extends InstrumentationSpecification {
       } |
       [
         "gen_ai.request.model": "mistral.mistral-large-2402-v1:0",
-        "gen_ai.system": "aws_bedrock",
+        "gen_ai.system": "aws.bedrock",
         "gen_ai.request.max_tokens": "4096",
         "gen_ai.request.temperature": "0.75",
         "gen_ai.request.top_p": "0.25",

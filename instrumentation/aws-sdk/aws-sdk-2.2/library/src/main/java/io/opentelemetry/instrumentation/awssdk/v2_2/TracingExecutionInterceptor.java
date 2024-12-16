@@ -44,7 +44,7 @@ import software.amazon.awssdk.http.SdkHttpResponse;
 
 /** AWS request execution interceptor. */
 final class TracingExecutionInterceptor implements ExecutionInterceptor {
-  private static final String GEN_AI_SYSTEM_BEDROCK = "aws_bedrock";
+  private static final String GEN_AI_SYSTEM_BEDROCK = "aws.bedrock";
 
   // the class name is part of the attribute name, so that it will be shaded when used in javaagent
   // instrumentation, and won't conflict with usage outside javaagent instrumentation
