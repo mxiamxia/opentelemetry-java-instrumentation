@@ -5,14 +5,12 @@
 
 package io.opentelemetry.instrumentation.awssdk.v1_11;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -28,10 +26,8 @@ final class RequestAccess {
         }
       };
 
-  private static final ObjectMapper objectMapper = new ObjectMapper();
-
   @Nullable
-  private static JsonNode parseTargetBody(ByteBuffer buffer) {
+  private static BedrockJsonParser.LlmJson parseTargetBody(ByteBuffer buffer) {
     try {
       byte[] bytes;
       // Create duplicate to avoid mutating the original buffer position
@@ -46,14 +42,15 @@ final class RequestAccess {
         bytes = new byte[buffer.remaining()];
         buffer.get(bytes);
       }
-      return objectMapper.readTree(bytes);
-    } catch (IOException e) {
+      String jsonString = new String(bytes, StandardCharsets.UTF_8); // Convert to String
+      return BedrockJsonParser.parse(jsonString);
+    } catch (RuntimeException e) {
       return null;
     }
   }
 
   @Nullable
-  private static JsonNode getJsonBody(Object target) {
+  private static BedrockJsonParser.LlmJson getJsonBody(Object target) {
     if (target == null) {
       return null;
     }
@@ -68,47 +65,36 @@ final class RequestAccess {
   }
 
   @Nullable
-  private static String findFirstMatchingPath(JsonNode jsonBody, String... paths) {
+  private static String findFirstMatchingPath(BedrockJsonParser.LlmJson jsonBody, String... paths) {
     if (jsonBody == null) {
       return null;
     }
 
     return Stream.of(paths)
-        .map(
-            path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                return node.asText();
-              }
-              return null;
-            })
+        .map(path -> BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path))
         .filter(Objects::nonNull)
+        .map(Object::toString)
         .findFirst()
         .orElse(null);
   }
 
   @Nullable
-  private static String approximateTokenCount(JsonNode jsonBody, String... textPaths) {
+  private static String approximateTokenCount(
+      BedrockJsonParser.LlmJson jsonBody, String... textPaths) {
     if (jsonBody == null) {
       return null;
     }
 
     return Stream.of(textPaths)
-        .map(
-            path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                int tokenEstimate = (int) Math.ceil(node.asText().length() / 6.0);
-                return Integer.toString(tokenEstimate);
-              }
-              return null;
-            })
-        .filter(Objects::nonNull)
+        .map(path -> BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path))
+        .filter(value -> value instanceof String)
+        .map(value -> Integer.toString((int) Math.ceil(((String) value).length() / 6.0)))
         .findFirst()
         .orElse(null);
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/max_new_tokens"
   // Amazon Titan -> "/textGenerationConfig/maxTokenCount"
   // Anthropic Claude -> "/max_tokens"
   // Cohere Command -> "/max_tokens"
@@ -118,11 +104,17 @@ final class RequestAccess {
   // Mistral AI -> "/max_tokens"
   @Nullable
   static String getMaxTokens(Object target) {
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
-        getJsonBody(target), "/textGenerationConfig/maxTokenCount", "/max_tokens", "/max_gen_len");
+        jsonBody,
+        "/max_tokens",
+        "/max_gen_len",
+        "/textGenerationConfig/maxTokenCount",
+        "/inferenceConfig/max_new_tokens");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/temperature"
   // Amazon Titan -> "/textGenerationConfig/temperature"
   // Anthropic Claude -> "/temperature"
   // Cohere Command -> "/temperature"
@@ -132,11 +124,16 @@ final class RequestAccess {
   // Mistral AI -> "/temperature"
   @Nullable
   static String getTemperature(Object target) {
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     return findFirstMatchingPath(
-        getJsonBody(target), "/textGenerationConfig/temperature", "/temperature");
+        jsonBody,
+        "/temperature",
+        "/textGenerationConfig/temperature",
+        "inferenceConfig/temperature");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/top_p"
   // Amazon Titan -> "/textGenerationConfig/topP"
   // Anthropic Claude -> "/top_p"
   // Cohere Command -> "/p"
@@ -146,10 +143,13 @@ final class RequestAccess {
   // Mistral AI -> "/top_p"
   @Nullable
   static String getTopP(Object target) {
-    return findFirstMatchingPath(getJsonBody(target), "/textGenerationConfig/topP", "/top_p", "/p");
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
+    return findFirstMatchingPath(
+        jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "/inferenceConfig/top_p");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/inputTokens"
   // Amazon Titan -> "/inputTextTokenCount"
   // Anthropic Claude -> "/usage/input_tokens"
   // Cohere Command -> "/prompt"
@@ -159,21 +159,22 @@ final class RequestAccess {
   // Mistral AI -> "/prompt"
   @Nullable
   static String getInputTokens(Object target) {
-    JsonNode jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     if (jsonBody == null) {
       return null;
     }
 
-    // Try direct tokens counts first
+    // Try direct token counts first
     String directCount =
         findFirstMatchingPath(
             jsonBody,
             "/inputTextTokenCount",
+            "/prompt_token_count",
             "/usage/input_tokens",
             "/usage/prompt_tokens",
-            "/prompt_token_count");
+            "/usage/inputTokens");
 
-    if (directCount != null) {
+    if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
@@ -182,6 +183,7 @@ final class RequestAccess {
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/outputTokens"
   // Amazon Titan -> "/results/0/tokenCount"
   // Anthropic Claude -> "/usage/output_tokens"
   // Cohere Command -> "/generations/0/text"
@@ -191,7 +193,7 @@ final class RequestAccess {
   // Mistral AI -> "/outputs/0/text"
   @Nullable
   static String getOutputTokens(Object target) {
-    JsonNode jsonBody = getJsonBody(target);
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     if (jsonBody == null) {
       return null;
     }
@@ -200,19 +202,22 @@ final class RequestAccess {
     String directCount =
         findFirstMatchingPath(
             jsonBody,
+            "/generation_token_count",
             "/results/0/tokenCount",
             "/usage/output_tokens",
             "/usage/completion_tokens",
-            "/generation_token_count");
+            "/usage/outputTokens");
 
-    if (directCount != null) {
+    if (directCount != null && !directCount.equals("null")) {
       return directCount;
     }
 
-    return approximateTokenCount(jsonBody, "/outputs/0/text", "/text");
+    // Fall back to token approximation
+    return approximateTokenCount(jsonBody, "/text", "/outputs/0/text");
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/stopReason"
   // Amazon Titan -> "/results/0/completionReason"
   // Anthropic Claude -> "/stop_reason"
   // Cohere Command -> "/generations/0/finish_reason"
@@ -222,15 +227,17 @@ final class RequestAccess {
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
   static String getFinishReasons(Object target) {
+    BedrockJsonParser.LlmJson jsonBody = getJsonBody(target);
     String finishReason =
         findFirstMatchingPath(
-            getJsonBody(target),
-            "/results/0/completionReason",
+            jsonBody,
+            "/stopReason",
+            "/finish_reason",
             "/stop_reason",
+            "/results/0/completionReason",
             "/generations/0/finish_reason",
             "/choices/0/finish_reason",
-            "/outputs/0/stop_reason",
-            "/finish_reason");
+            "/outputs/0/stop_reason");
 
     return finishReason != null ? "[" + finishReason + "]" : null;
   }

@@ -5,17 +5,14 @@
 
 package io.opentelemetry.instrumentation.awssdk.v2_2.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.SdkPojo;
@@ -26,8 +23,6 @@ import software.amazon.awssdk.utils.IoUtils;
 import software.amazon.awssdk.utils.StringUtils;
 
 class Serializer {
-
-  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Nullable
   String serialize(Object target) {
@@ -52,10 +47,10 @@ class Serializer {
   @Nullable
   String serialize(String attributeName, Object target) {
     try {
-      JsonNode jsonBody;
+      // Extract JSON string from target if it is a Bedrock Runtime JSON blob
+      String jsonString;
       if (target instanceof SdkBytes) {
-        String jsonString = ((SdkBytes) target).asUtf8String();
-        jsonBody = objectMapper.readTree(jsonString);
+        jsonString = ((SdkBytes) target).asUtf8String();
       } else {
         if (target != null) {
           return target.toString();
@@ -63,23 +58,27 @@ class Serializer {
         return null;
       }
 
+      // Parse the LLM JSON string into a Map
+      BedrockJsonParser.LlmJson llmJson = BedrockJsonParser.parse(jsonString);
+
+      // Use attribute name to extract the corresponding value
       switch (attributeName) {
         case "gen_ai.request.max_tokens":
-          return getMaxTokens(jsonBody);
+          return getMaxTokens(llmJson);
         case "gen_ai.request.temperature":
-          return getTemperature(jsonBody);
+          return getTemperature(llmJson);
         case "gen_ai.request.top_p":
-          return getTopP(jsonBody);
+          return getTopP(llmJson);
         case "gen_ai.response.finish_reasons":
-          return getFinishReasons(jsonBody);
+          return getFinishReasons(llmJson);
         case "gen_ai.usage.input_tokens":
-          return getInputTokens(jsonBody);
+          return getInputTokens(llmJson);
         case "gen_ai.usage.output_tokens":
-          return getOutputTokens(jsonBody);
+          return getOutputTokens(llmJson);
         default:
           return null;
       }
-    } catch (JsonProcessingException e) {
+    } catch (RuntimeException e) {
       return null;
     }
   }
@@ -110,37 +109,14 @@ class Serializer {
   }
 
   @Nullable
-  private static String findFirstMatchingPath(JsonNode jsonBody, String... paths) {
-    if (jsonBody == null) {
-      return null;
-    }
-
-    return Stream.of(paths)
+  private static String approximateTokenCount(
+      BedrockJsonParser.LlmJson jsonBody, String... textPaths) {
+    return Arrays.stream(textPaths)
         .map(
             path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                return node.asText();
-              }
-              return null;
-            })
-        .filter(Objects::nonNull)
-        .findFirst()
-        .orElse(null);
-  }
-
-  @Nullable
-  private static String approximateTokenCount(JsonNode jsonBody, String... textPaths) {
-    if (jsonBody == null) {
-      return null;
-    }
-
-    return Stream.of(textPaths)
-        .map(
-            path -> {
-              JsonNode node = jsonBody.at(path);
-              if (node != null && !node.isMissingNode()) {
-                int tokenEstimate = (int) Math.ceil(node.asText().length() / 6.0);
+              Object value = BedrockJsonParser.JsonPathResolver.resolvePath(jsonBody, path);
+              if (value instanceof String) {
+                int tokenEstimate = (int) Math.ceil(((String) value).length() / 6.0);
                 return Integer.toString(tokenEstimate);
               }
               return null;
@@ -151,6 +127,7 @@ class Serializer {
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/max_new_tokens"
   // Amazon Titan -> "/textGenerationConfig/maxTokenCount"
   // Anthropic Claude -> "/max_tokens"
   // Cohere Command -> "/max_tokens"
@@ -159,12 +136,19 @@ class Serializer {
   // Meta Llama -> "/max_gen_len"
   // Mistral AI -> "/max_tokens"
   @Nullable
-  private static String getMaxTokens(JsonNode jsonBody) {
-    return findFirstMatchingPath(
-        jsonBody, "/textGenerationConfig/maxTokenCount", "/max_tokens", "/max_gen_len");
+  private static String getMaxTokens(BedrockJsonParser.LlmJson jsonBody) {
+    Object value =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody,
+            "/max_tokens",
+            "/max_gen_len",
+            "/textGenerationConfig/maxTokenCount",
+            "inferenceConfig/max_new_tokens");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/temperature"
   // Amazon Titan -> "/textGenerationConfig/temperature"
   // Anthropic Claude -> "/temperature"
   // Cohere Command -> "/temperature"
@@ -173,11 +157,18 @@ class Serializer {
   // Meta Llama -> "/temperature"
   // Mistral AI -> "/temperature"
   @Nullable
-  private static String getTemperature(JsonNode jsonBody) {
-    return findFirstMatchingPath(jsonBody, "/textGenerationConfig/temperature", "/temperature");
+  private static String getTemperature(BedrockJsonParser.LlmJson jsonBody) {
+    Object value =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody,
+            "/temperature",
+            "/textGenerationConfig/temperature",
+            "/inferenceConfig/temperature");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/inferenceConfig/top_p"
   // Amazon Titan -> "/textGenerationConfig/topP"
   // Anthropic Claude -> "/top_p"
   // Cohere Command -> "/p"
@@ -186,11 +177,15 @@ class Serializer {
   // Meta Llama -> "/top_p"
   // Mistral AI -> "/top_p"
   @Nullable
-  private static String getTopP(JsonNode jsonBody) {
-    return findFirstMatchingPath(jsonBody, "/textGenerationConfig/topP", "/top_p", "/p");
+  private static String getTopP(BedrockJsonParser.LlmJson jsonBody) {
+    Object value =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
+            jsonBody, "/top_p", "/p", "/textGenerationConfig/topP", "/inferenceConfig/top_p");
+    return value != null ? String.valueOf(value) : null;
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/stopReason"
   // Amazon Titan -> "/results/0/completionReason"
   // Anthropic Claude -> "/stop_reason"
   // Cohere Command -> "/generations/0/finish_reason"
@@ -199,21 +194,23 @@ class Serializer {
   // Meta Llama -> "/stop_reason"
   // Mistral AI -> "/outputs/0/stop_reason"
   @Nullable
-  private static String getFinishReasons(JsonNode jsonBody) {
-    String finishReason =
-        findFirstMatchingPath(
+  private static String getFinishReasons(BedrockJsonParser.LlmJson jsonBody) {
+    Object value =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
             jsonBody,
-            "/results/0/completionReason",
+            "/stopReason",
+            "/finish_reason",
             "/stop_reason",
+            "/results/0/completionReason",
             "/generations/0/finish_reason",
             "/choices/0/finish_reason",
-            "/outputs/0/stop_reason",
-            "/finish_reason");
+            "/outputs/0/stop_reason");
 
-    return finishReason != null ? "[" + finishReason + "]" : null;
+    return value != null ? "[" + value + "]" : null;
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/inputTokens"
   // Amazon Titan -> "/inputTextTokenCount"
   // Anthropic Claude -> "/usage/input_tokens"
   // Cohere Command -> "/prompt"
@@ -222,25 +219,29 @@ class Serializer {
   // Meta Llama -> "/prompt_token_count"
   // Mistral AI -> "/prompt"
   @Nullable
-  private static String getInputTokens(JsonNode jsonBody) {
+  private static String getInputTokens(BedrockJsonParser.LlmJson jsonBody) {
     // Try direct tokens counts first
-    String directCount =
-        findFirstMatchingPath(
+    Object directCount =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
             jsonBody,
             "/inputTextTokenCount",
+            "/prompt_token_count",
             "/usage/input_tokens",
             "/usage/prompt_tokens",
-            "/prompt_token_count");
+            "/usage/inputTokens");
 
     if (directCount != null) {
-      return directCount;
+      return String.valueOf(directCount);
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(jsonBody, "/prompt", "/message");
+    Object approxTokenCount = approximateTokenCount(jsonBody, "/prompt", "/message");
+
+    return approxTokenCount != null ? String.valueOf(approxTokenCount) : null;
   }
 
   // Model -> Path Mapping:
+  // Amazon Nova -> "/usage/outputTokens"
   // Amazon Titan -> "/results/0/tokenCount"
   // Anthropic Claude -> "/usage/output_tokens"
   // Cohere Command -> "/generations/0/text"
@@ -249,21 +250,24 @@ class Serializer {
   // Meta Llama -> "/generation_token_count"
   // Mistral AI -> "/outputs/0/text"
   @Nullable
-  private static String getOutputTokens(JsonNode jsonBody) {
+  private static String getOutputTokens(BedrockJsonParser.LlmJson jsonBody) {
     // Try direct token counts first
-    String directCount =
-        findFirstMatchingPath(
+    Object directCount =
+        BedrockJsonParser.JsonPathResolver.resolvePath(
             jsonBody,
+            "/generation_token_count",
             "/results/0/tokenCount",
             "/usage/output_tokens",
             "/usage/completion_tokens",
-            "/generation_token_count");
+            "/usage/outputTokens");
 
     if (directCount != null) {
-      return directCount;
+      return String.valueOf(directCount);
     }
 
     // Fall back to token approximation
-    return approximateTokenCount(jsonBody, "/outputs/0/text", "/text");
+    Object approxTokenCount = approximateTokenCount(jsonBody, "/text", "/outputs/0/text");
+
+    return approxTokenCount != null ? String.valueOf(approxTokenCount) : null;
   }
 }
