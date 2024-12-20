@@ -57,7 +57,7 @@ public abstract class AbstractBedrockRuntimeClientTest extends AbstractBaseAwsCl
           "{\"choices\":[{\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":42}}",
           ImmutableMap.of(
               "gen_ai.request.model", "ai21.jamba-1-5-mini-v1:0",
-              "gen_ai.system", "aws_bedrock",
+              "gen_ai.system", "aws.bedrock",
               "gen_ai.request.max_tokens", "1000",
               "gen_ai.request.temperature", "0.7",
               "gen_ai.request.top_p", "0.8",
@@ -71,7 +71,7 @@ public abstract class AbstractBedrockRuntimeClientTest extends AbstractBaseAwsCl
           "{\"inputTextTokenCount\":5,\"results\":[{\"tokenCount\":42,\"outputText\":\"Hi! I'm Titan, an AI assistant.\",\"completionReason\":\"stop\"}]}",
           ImmutableMap.of(
               "gen_ai.request.model", "amazon.titan-text-premier-v1:0",
-              "gen_ai.system", "aws_bedrock",
+              "gen_ai.system", "aws.bedrock",
               "gen_ai.request.max_tokens", "100",
               "gen_ai.request.temperature", "0.7",
               "gen_ai.request.top_p", "0.9",
@@ -85,7 +85,7 @@ public abstract class AbstractBedrockRuntimeClientTest extends AbstractBaseAwsCl
           "{\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":2095,\"output_tokens\":503}}",
           ImmutableMap.of(
               "gen_ai.request.model", "anthropic.claude-3-5-sonnet-20241022-v2:0",
-              "gen_ai.system", "aws_bedrock",
+              "gen_ai.system", "aws.bedrock",
               "gen_ai.request.max_tokens", "100",
               "gen_ai.request.temperature", "0.7",
               "gen_ai.request.top_p", "0.9",
@@ -99,7 +99,7 @@ public abstract class AbstractBedrockRuntimeClientTest extends AbstractBaseAwsCl
           "{\"prompt_token_count\":2095,\"generation_token_count\":503,\"stop_reason\":\"stop\"}",
           ImmutableMap.of(
               "gen_ai.request.model", "meta.llama3-70b-instruct-v1:0",
-              "gen_ai.system", "aws_bedrock",
+              "gen_ai.system", "aws.bedrock",
               "gen_ai.request.max_tokens", "128",
               "gen_ai.request.temperature", "0.1",
               "gen_ai.request.top_p", "0.9",
@@ -113,7 +113,7 @@ public abstract class AbstractBedrockRuntimeClientTest extends AbstractBaseAwsCl
           "{\"text\":\"test-output\",\"finish_reason\":\"COMPLETE\"}",
           ImmutableMap.of(
               "gen_ai.request.model", "cohere.command-r-v1:0",
-              "gen_ai.system", "aws_bedrock",
+              "gen_ai.system", "aws.bedrock",
               "gen_ai.request.max_tokens", "4096",
               "gen_ai.request.temperature", "0.8",
               "gen_ai.request.top_p", "0.45",
