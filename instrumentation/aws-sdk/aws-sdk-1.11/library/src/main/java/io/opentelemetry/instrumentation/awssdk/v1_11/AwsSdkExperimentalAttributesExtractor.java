@@ -136,7 +136,7 @@ class AwsSdkExperimentalAttributesExtractor
         if (!Objects.equals(requestClassName, "InvokeModelRequest")) {
           break;
         }
-        attributes.put(AWS_BEDROCK_SYSTEM, "aws_bedrock");
+        attributes.put(AWS_BEDROCK_SYSTEM, "aws.bedrock");
         Function<Object, String> getter = RequestAccess::getModelId;
         String modelId = getter.apply(originalRequest);
         attributes.put(AWS_BEDROCK_RUNTIME_MODEL_ID, modelId);

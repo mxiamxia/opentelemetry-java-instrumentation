@@ -50,7 +50,7 @@ import software.amazon.awssdk.http.SdkHttpResponse;
  * at any time.
  */
 public final class TracingExecutionInterceptor implements ExecutionInterceptor {
-  private static final String GEN_AI_SYSTEM_BEDROCK = "aws_bedrock";
+  private static final String GEN_AI_SYSTEM_BEDROCK = "aws.bedrock";
 
   // copied from DbIncubatingAttributes
   private static final AttributeKey<String> DB_OPERATION = AttributeKey.stringKey("db.operation");

@@ -172,7 +172,7 @@ abstract class AbstractAws2ClientTest extends AbstractAws2ClientCoreTest {
               "aws.bedrock.data_source.id" "datasourceId"
             } else if (service == "BedrockRuntime" && operation == "InvokeModel") {
               "gen_ai.request.model" "meta.llama2-13b-chat-v1"
-              "gen_ai.system" "aws_bedrock"
+              "gen_ai.system" "aws.bedrock"
             } else if (service == "Sfn" && operation == "DescribeStateMachine") {
               "aws.stepfunctions.state_machine.arn" "stateMachineArn"
             } else if (service == "Sfn" && operation == "DescribeActivity") {
