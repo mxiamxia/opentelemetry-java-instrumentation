@@ -252,6 +252,14 @@ final class RequestAccess {
   }
 
   @Nullable
+  static String getLambdaArn(Object request) {
+    if (request == null) {
+      return null;
+    }
+    return findNestedAccessorOrNull(request, "getConfiguration", "getFunctionArn");
+  }
+
+  @Nullable
   static String getLambdaResourceId(Object request) {
     if (request == null) {
       return null;
@@ -339,6 +347,23 @@ final class RequestAccess {
     }
     RequestAccess access = REQUEST_ACCESSORS.get(request.getClass());
     return invokeOrNull(access.getTableName, request);
+  }
+
+  @Nullable
+  static String getTableArn(Object request) {
+    if (request == null) {
+      return null;
+    }
+    return findNestedAccessorOrNull(request, "getTable", "getTableArn");
+  }
+
+  @Nullable
+  static String getStreamArn(Object request) {
+    if (request == null) {
+      return null;
+    }
+    RequestAccess access = REQUEST_ACCESSORS.get(request.getClass());
+    return invokeOrNull(access.getStreamArn, request);
   }
 
   @Nullable
@@ -441,6 +466,7 @@ final class RequestAccess {
   @Nullable private final MethodHandle getQueueUrl;
   @Nullable private final MethodHandle getQueueName;
   @Nullable private final MethodHandle getStreamName;
+  @Nullable private final MethodHandle getStreamArn;
   @Nullable private final MethodHandle getTableName;
   @Nullable private final MethodHandle getTopicArn;
   @Nullable private final MethodHandle getTargetArn;
@@ -462,6 +488,7 @@ final class RequestAccess {
     getQueueUrl = findAccessorOrNull(clz, "getQueueUrl", String.class);
     getQueueName = findAccessorOrNull(clz, "getQueueName", String.class);
     getStreamName = findAccessorOrNull(clz, "getStreamName", String.class);
+    getStreamArn = findAccessorOrNull(clz, "getStreamARN", String.class);
     getTableName = findAccessorOrNull(clz, "getTableName", String.class);
     getTopicArn = findAccessorOrNull(clz, "getTopicArn", String.class);
     getTargetArn = findAccessorOrNull(clz, "getTargetArn", String.class);

@@ -172,6 +172,8 @@ public abstract class AbstractAws2ClientRecordHttpErrorTest {
                       span.hasKind(SpanKind.CLIENT);
                       span.hasNoParent();
                       span.hasAttributesSatisfyingExactly(
+                          equalTo(stringKey("aws.auth.account.access_key"), "my-access-key"),
+                          equalTo(stringKey("aws.auth.region"), "ap-northeast-1"),
                           equalTo(SERVER_ADDRESS, "127.0.0.1"),
                           equalTo(SERVER_PORT, server.httpPort()),
                           equalTo(HTTP_REQUEST_METHOD, method),

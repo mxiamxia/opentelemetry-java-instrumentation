@@ -66,6 +66,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateQueue"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -88,6 +89,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateBucket"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -111,6 +113,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "GetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -134,6 +137,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -155,6 +159,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetBucketNotificationConfiguration"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -176,6 +181,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "PutObject"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -197,6 +203,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "ReceiveMessage"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -227,6 +234,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "ListObjects"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "GET"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -248,6 +256,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "DeleteObject"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "DELETE"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 204
@@ -269,6 +278,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "DeleteBucket"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "DELETE"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 204
@@ -292,6 +302,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "PurgeQueue"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -347,6 +358,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateQueue"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -369,6 +381,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "GetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -389,6 +402,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateBucket"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -411,6 +425,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateTopic"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -433,6 +448,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "Subscribe"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -457,6 +473,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -478,6 +495,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetTopicAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -500,6 +518,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetBucketNotificationConfiguration"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -521,6 +540,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "PutObject"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "PUT"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -544,6 +564,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "ReceiveMessage"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }
@@ -574,6 +595,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "ListObjects"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "GET"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
@@ -595,6 +617,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "DeleteObject"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "DELETE"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 204
@@ -616,6 +639,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "DeleteBucket"
             "rpc.system" "aws-api"
             "rpc.service" "Amazon S3"
+            "aws.auth.account.access_key" "test"
             "aws.bucket.name" bucketName
             "$HttpAttributes.HTTP_REQUEST_METHOD" "DELETE"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 204
@@ -639,6 +663,7 @@ class S3TracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "PurgeQueue"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://") }

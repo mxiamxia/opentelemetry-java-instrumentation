@@ -133,6 +133,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
             "rpc.system" "aws-api"
             "rpc.service" "Sqs"
             "rpc.method" "CreateQueue"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -153,6 +155,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
             "rpc.system" "aws-api"
             "rpc.method" "SendMessage"
             "rpc.service" "Sqs"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -174,6 +178,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
             "rpc.method" "ReceiveMessage"
             "rpc.system" "aws-api"
             "rpc.service" "Sqs"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -214,6 +220,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
               "aws.queue.url" "http://localhost:$sqsPort/000000000000/testSdkSqs"
               "rpc.system" "aws-api"
               "rpc.service" "Sqs"
+              "aws.auth.account.access_key" "my-access-key"
+              "aws.auth.region" "ap-northeast-1"
               "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
               "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
               "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -325,6 +333,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
             "rpc.system" "aws-api"
             "rpc.method" "SendMessageBatch"
             "rpc.service" "Sqs"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -347,6 +357,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
               "rpc.method" "ReceiveMessage"
               "rpc.system" "aws-api"
               "rpc.service" "Sqs"
+              "aws.auth.account.access_key" "my-access-key"
+              "aws.auth.region" "ap-northeast-1"
               "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
               "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
               "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
@@ -377,6 +389,8 @@ abstract class AbstractAws2SqsSuppressReceiveSpansTest extends InstrumentationSp
               "rpc.service" "Sqs"
               "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
               "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
+              "aws.auth.account.access_key" "my-access-key"
+              "aws.auth.region" "ap-northeast-1"
               "$UrlAttributes.URL_FULL" { it.startsWith("http://localhost:$sqsPort") }
               "$ServerAttributes.SERVER_ADDRESS" "localhost"
               "$ServerAttributes.SERVER_PORT" sqsPort

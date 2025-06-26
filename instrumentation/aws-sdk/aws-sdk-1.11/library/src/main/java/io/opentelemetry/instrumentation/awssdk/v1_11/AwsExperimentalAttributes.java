@@ -16,7 +16,9 @@ final class AwsExperimentalAttributes {
   static final AttributeKey<String> AWS_QUEUE_URL = stringKey("aws.queue.url");
   static final AttributeKey<String> AWS_QUEUE_NAME = stringKey("aws.queue.name");
   static final AttributeKey<String> AWS_STREAM_NAME = stringKey("aws.stream.name");
+  static final AttributeKey<String> AWS_STREAM_ARN = stringKey("aws.stream.arn");
   static final AttributeKey<String> AWS_TABLE_NAME = stringKey("aws.table.name");
+  static final AttributeKey<String> AWS_TABLE_ARN = stringKey("aws.table.arn");
   static final AttributeKey<String> AWS_AGENT_ID = stringKey("aws.bedrock.agent.id");
   static final AttributeKey<String> AWS_KNOWLEDGE_BASE_ID =
       stringKey("aws.bedrock.knowledge_base.id");
@@ -45,8 +47,10 @@ final class AwsExperimentalAttributes {
   static final AttributeKey<String> AWS_SNS_TOPIC_ARN = stringKey("aws.sns.topic.arn");
   static final AttributeKey<String> AWS_SECRET_ARN = stringKey("aws.secretsmanager.secret.arn");
   static final AttributeKey<String> AWS_LAMBDA_NAME = stringKey("aws.lambda.function.name");
+  static final AttributeKey<String> AWS_LAMBDA_ARN = stringKey("aws.lambda.function.arn");
   static final AttributeKey<String> AWS_LAMBDA_RESOURCE_ID =
       stringKey("aws.lambda.resource_mapping.id");
+  static final AttributeKey<String> AWS_AUTH_ACCESS_KEY = stringKey("aws.auth.account.access_key");
 
   private AwsExperimentalAttributes() {}
 }

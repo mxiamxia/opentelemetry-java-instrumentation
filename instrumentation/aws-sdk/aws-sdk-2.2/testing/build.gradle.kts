@@ -13,7 +13,7 @@ dependencies {
   // explicitly in user projects, e.g. using testLatestDeps.
   compileOnly("software.amazon.awssdk:dynamodb:2.2.0")
   compileOnly("software.amazon.awssdk:ec2:2.2.0")
-  compileOnly("software.amazon.awssdk:kinesis:2.2.0")
+  compileOnly("software.amazon.awssdk:kinesis:2.31.42")
   compileOnly("software.amazon.awssdk:lambda:2.2.0")
   compileOnly("software.amazon.awssdk:rds:2.2.0")
   compileOnly("software.amazon.awssdk:s3:2.2.0")
