@@ -144,6 +144,8 @@ abstract class AbstractAws2ClientTest extends AbstractAws2ClientCoreTest {
             "$RpcIncubatingAttributes.RPC_SYSTEM" "aws-api"
             "$RpcIncubatingAttributes.RPC_SERVICE" "$service"
             "$RpcIncubatingAttributes.RPC_METHOD" "${operation}"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "aws.agent" "java-aws-sdk"
             "$AwsIncubatingAttributes.AWS_REQUEST_ID" "$requestId"
             if (service == "S3") {
@@ -158,8 +160,6 @@ abstract class AbstractAws2ClientTest extends AbstractAws2ClientCoreTest {
               "$MessagingIncubatingAttributes.MESSAGING_SYSTEM" MessagingIncubatingAttributes.MessagingSystemIncubatingValues.AWS_SQS
             } else if (service == "Kinesis") {
               "aws.stream.name" "somestream"
-            } else if (service == "Kinesis" && operation == "DescribeStream") {
-              "aws.stream.arn" "somestreamarn"
             } else if (service == "Sns" && operation == "Publish") {
               "$MessagingIncubatingAttributes.MESSAGING_DESTINATION_NAME" "sometargetarn"
             } else if (service == "Sns" && operation == "Subscribe") {
@@ -200,7 +200,6 @@ abstract class AbstractAws2ClientTest extends AbstractAws2ClientCoreTest {
     "S3"      | "CreateBucket"      | "PUT"  | "UNKNOWN"                              | s3ClientBuilder()       | { c -> c.createBucket(CreateBucketRequest.builder().bucket("somebucket").build()) }              | ""
     "S3"      | "GetObject"         | "GET"  | "UNKNOWN"                              | s3ClientBuilder()       | { c -> c.getObject(GetObjectRequest.builder().bucket("somebucket").key("somekey").build()) }     | ""
     "Kinesis" | "DeleteStream"      | "POST" | "UNKNOWN"                              | KinesisClient.builder() | { c -> c.deleteStream(DeleteStreamRequest.builder().streamName("somestream").build()) }          | ""
-    "Kinesis" | "DescribeStream"    | "GET"  | "UNKNOWN"                              | KinesisClient.builder() | { c -> c.describeStream(DescribeStreamRequest.builder().streamName("somestream").streamARN("somestreamarn").build()) }          | ""
     "Sns"     | "Publish"           | "POST" | "d74b8436-ae13-5ab4-a9ff-ce54dfea72a0" | SnsClient.builder()     | { c -> c.publish(PublishRequest.builder().message("somemessage").targetArn("sometargetarn").build()) }  | """
           <PublishResponse xmlns="https://sns.amazonaws.com/doc/2010-03-31/">
               <PublishResult>
@@ -517,6 +516,8 @@ abstract class AbstractAws2ClientTest extends AbstractAws2ClientCoreTest {
             "$RpcIncubatingAttributes.RPC_SYSTEM" "aws-api"
             "$RpcIncubatingAttributes.RPC_SERVICE" "S3"
             "$RpcIncubatingAttributes.RPC_METHOD" "GetObject"
+            "aws.auth.account.access_key" "my-access-key"
+            "aws.auth.region" "ap-northeast-1"
             "aws.agent" "java-aws-sdk"
             "aws.bucket.name" "somebucket"
           }

@@ -58,6 +58,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateQueue"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -81,6 +82,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "GetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -104,6 +106,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "SetQueueAttributes"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -126,6 +129,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "CreateTopic"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -149,6 +153,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "Subscribe"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -172,6 +177,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.method" "Publish"
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSNS"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
@@ -194,6 +200,7 @@ class SnsTracingTest extends AgentInstrumentationSpecification {
             "rpc.system" "aws-api"
             "rpc.service" "AmazonSQS"
             "rpc.method" "ReceiveMessage"
+            "aws.auth.account.access_key" "test"
             "$HttpAttributes.HTTP_REQUEST_METHOD" "POST"
             "$HttpAttributes.HTTP_RESPONSE_STATUS_CODE" 200
             "$UrlAttributes.URL_FULL" String
